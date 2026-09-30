@@ -25,6 +25,13 @@ npm run build      # tsc + vite build -> client/dist
 npx tsc --noEmit   # kiểm tra kiểu nhanh
 ```
 
+## Deploy
+
+- Repo: https://github.com/namnt877431/vnpt-heart (public) — bản demo: https://namnt877431.github.io/vnpt-heart/
+- Push lên `main` → workflow `.github/workflows/deploy.yml` tự build `client/` và đăng lên GitHub Pages (~1 phút).
+- Bản demo công khai: chỉ dùng dữ liệu mock, không đưa dữ liệu nhân viên thật lên đây.
+- Triển khai nội bộ: `npm run build` rồi chép `client/dist/` lên IIS/Nginx (web tĩnh, `base: './'`).
+
 ## Cấu trúc thư mục
 
 ```
