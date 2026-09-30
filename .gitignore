@@ -3,3 +3,5 @@ dist/
 *.log
 .DS_Store
 .claude/settings.local.json
+# internal BTC documents (repo is public)
+docs/*.docx

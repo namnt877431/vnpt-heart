@@ -7,7 +7,7 @@ import { icon } from '../icons';
 import type { ScreenModule } from './types';
 
 const CHALLENGES = [
-  { title: 'Cả nhóm vượt Ải 01', reward: 200, progress: 18, target: 24, icon: 'flag' },
+  { title: 'Cả nhóm vượt Chặng 1', reward: 200, progress: 18, target: 24, icon: 'flag' },
   { title: 'Tổng 5.000 sao trong tuần', reward: 150, progress: 3420, target: 5000, icon: 'star' },
 ];
 
@@ -32,6 +32,10 @@ export const groupScreen: ScreenModule = {
                 <div><dt>Điểm TB</dt><dd>${fmt(g.avgScore)}</dd></div>
                 <div><dt>Thành viên</dt><dd>${g.members}</dd></div>
               </dl>
+              <dl class="stats stats--2">
+                <div><dt>Tỷ lệ tham gia</dt><dd>${g.participation}%</dd></div>
+                <div><dt>Thành tích kỳ</dt><dd>+${fmt(g.periodBonus)}</dd></div>
+              </dl>
               <div class="goal">
                 <small>Mục tiêu tuần: ${g.weeklyGoal.progress}/${g.weeklyGoal.target} ${esc(g.weeklyGoal.label)}</small>
                 ${progressBar(g.weeklyGoal.progress, g.weeklyGoal.target, 'gold')}
@@ -55,6 +59,15 @@ export const groupScreen: ScreenModule = {
                   </span>
                   <span class="challenge__reward">+${c.reward}${icon('star', 16, 'c-gold')}</span>
                 </button>`).join('')}
+              <div class="formula">
+                <h3>${icon('users', 18)} Cách tính điểm nhóm</h3>
+                <p>Điểm TB thành viên + tỷ lệ tham gia + thành tích trong kỳ. Ví dụ:</p>
+                <ul>
+                  <li>Nhóm A: 10 người, 8.000 điểm → <b>800 điểm/người</b></li>
+                  <li>Nhóm B: 20 người, 15.000 điểm → <b>750 điểm/người</b></li>
+                </ul>
+                <small>Cả nhóm cùng tham gia mới lên hạng, không chỉ vài cá nhân xuất sắc.</small>
+              </div>
             </div>
           </div>
           <button class="btn btn--ghost btn--sm board__back" data-action="back">${icon('chevronLeft', 16)} Bản đồ</button>

@@ -16,7 +16,10 @@ hình AI theo phong cách chibi 2D kiểu Gunny. Key trong `config/assets.ts` gi
 | `bld-rule` | buildings/… | Toà văn phòng kính xanh, biển quyển sổ quy tắc | như trên |
 | `bld-5g` | buildings/… | Cột BTS đỏ trắng, sóng tín hiệu, chảo vệ tinh | như trên |
 | `bld-boss` | buildings/… | Pháo đài tối, khiên xanh tia sét | như trên |
-| `bld-master` | buildings/… | Toà tháp kính cao, vương miện vàng | như trên |
+| `bld-safety` | buildings/… | Nhà kho, sọc cảnh báo, mũ bảo hộ, cọc tiêu | như trên |
+| `bld-process` | buildings/… | Toà nhà có mũi tên quy trình, bánh răng | như trên |
+| `bld-ai` | buildings/… | Mái vòm kính, chip AI phát sáng | như trên |
+| (cảnh) | `ui/games/hazard-scenes.ts` | Văn phòng có 5 mối nguy (Tìm mối nguy) | giữ viewBox 800×450 để toạ độ điểm nguy vẫn đúng |
 
 **Không đưa chữ vào ảnh** (tên ải, số, tiếng Việt): chữ do code vẽ.
 Logo VNPT: dùng file chính thức, đặt tại `public/assets/images/brand/`.

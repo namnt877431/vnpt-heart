@@ -32,6 +32,13 @@ const STROKE: Record<string, string> = {
   plusHeart: 'M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10zM12 9v6M9 12h6',
   sword: 'M14.5 3H21v6.5L10 20.5 3.5 14 14.5 3zM6 16l-3 3 2 2 3-3',
   pin: 'M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+  chat: 'M4 5h16v11H9l-5 4V5zM8 9h8M8 12.5h5',
+  search: 'M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5L21 21',
+  link: 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1',
+  list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',
+  mail: 'M3 6h18v12H3zM3 7l9 7 9-7',
+  chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  unlock: 'M6 11h12v10H6zM8 11V7a4 4 0 0 1 7.5-2',
 };
 
 const FILLED: Record<string, string> = {

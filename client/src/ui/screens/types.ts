@@ -1,7 +1,13 @@
 import type { SceneKey, ScreenId } from '../../core/screens';
+import type { GameSpec, GameType } from '../../data/game-types';
 
 export interface ScreenParams {
-  stageId?: number;
+  chapterId?: string;
+  levelId?: string;
+  /** Gallery "Chơi thử": play the sample level of this type without saving progress. */
+  sample?: GameType | 'mystery';
+  /** Explicit spec (a Mystery Level outcome); recorded under `levelId` if present. */
+  spec?: GameSpec;
 }
 
 export interface ScreenContext {
@@ -17,8 +23,8 @@ export interface ScreenContext {
  */
 export interface ScreenModule {
   id: ScreenId;
-  /** Phaser scene rendered behind this screen. */
-  scene: SceneKey;
+  /** Phaser scene rendered behind this screen (may depend on params, e.g. boss levels). */
+  scene: SceneKey | ((params: ScreenParams) => SceneKey);
   /** Render into `root`; return a cleanup function (remove listeners, timers). */
   mount: (root: HTMLElement, ctx: ScreenContext) => () => void;
 }

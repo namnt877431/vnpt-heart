@@ -10,7 +10,7 @@ import type { Router } from './router';
 /** Top navigation. `screen` is the router target; order = display order. */
 const NAV: { screen: ScreenId; label: string; icon: string }[] = [
   { screen: 'home', label: 'Trang chủ', icon: 'home' },
-  { screen: 'play', label: 'Chơi game', icon: 'gamepad' },
+  { screen: 'games', label: 'Chơi game', icon: 'gamepad' },
   { screen: 'leaderboard', label: 'BXH', icon: 'trophy' },
   { screen: 'badges', label: 'Huy hiệu', icon: 'medal' },
   { screen: 'group', label: 'Nhóm', icon: 'users' },
@@ -66,7 +66,9 @@ export const bindShell = (ui: HTMLElement, router: Router): void => {
     user: () => toast('Hồ sơ cá nhân: sẽ có ở phiên bản sau', 'users'),
   });
 
+  // chapter/level screens belong to the "Trang chủ" journey; highlight it there
+  const navFor = (id: ScreenId): ScreenId => (id === 'chapter' || id === 'level' || id === 'share' ? 'home' : id);
   bus.on('screen:changed', ({ id }) => {
-    $$(topbar, '.nav__item').forEach((b) => b.classList.toggle('is-active', b.dataset.screen === id));
+    $$(topbar, '.nav__item').forEach((b) => b.classList.toggle('is-active', b.dataset.screen === navFor(id)));
   });
 };

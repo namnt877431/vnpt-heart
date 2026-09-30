@@ -1,35 +1,17 @@
 /**
  * Domain types. These mirror the shapes the future backend API should return,
  * so swapping mock.ts for real fetch calls should not change UI code.
+ * Level/chapter content types live in data/content/types.ts and data/game-types.ts.
  */
 export interface Player {
   id: string;
   name: string;
   role: string;
   groupId: string;
-  level: number;
-  xp: number;
-  xpNext: number;
-  stars: number;
-  weeklyRank: number;
-}
-
-export type StageStatus = 'done' | 'current' | 'locked';
-
-export interface Stage {
-  id: number;
-  title: string;
-  subtitle: string;
-  description: string;
-  /** Asset key of the building drawn on the island (see config/assets.ts). */
-  building: string;
-  status: StageStatus;
-  starsEarned: number;
-  maxStars: number;
-  questionCount: number;
-  rewardXp: number;
-  /** 'quiz' opens the question screen; 'boss' opens the Gunny-style boss fight. */
-  mode: 'quiz' | 'boss';
+  /** Points earned before this demo session (server total in production). */
+  basePoints: number;
+  /** XP earned before this demo session. */
+  baseXp: number;
 }
 
 export interface RankEntry {
@@ -46,6 +28,10 @@ export interface GroupRank {
   name: string;
   avgScore: number;
   members: number;
+  /** % of members who played in the period. */
+  participation: number;
+  /** Bonus from period achievements (boss clears, events). */
+  periodBonus: number;
 }
 
 export interface Badge {
@@ -67,19 +53,12 @@ export interface Mission {
   rewardStars: number;
 }
 
-export interface QuizQuestion {
-  id: string;
-  stageId: number;
-  index: number;
-  total: number;
-  text: string;
-  options: string[];
-  hint: string;
-  timeLimitSec: number;
+export interface Honor {
+  title: string;
+  icon: string;
+  playerId: string;
+  name: string;
+  value: string;
 }
 
-export interface BossInfo {
-  name: string;
-  hp: number;
-  hpMax: number;
-}
+export type RankPeriod = 'week' | 'month' | 'season';

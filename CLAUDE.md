@@ -1,10 +1,11 @@
 # VNPT Heart – Hành trình văn hóa VNPT Đắk Lắk
 
-Game web (HTML5) học văn hóa doanh nghiệp cho nhân viên VNPT Đắk Lắk. Phong cách hình ảnh
-tham khảo Gunny: nhân vật chibi 2D, đảo bay, UI viền dày, nút bóng 3D. Có 5 ải trên bản đồ,
-câu hỏi trắc nghiệm, màn Boss Fight kiểu bắn góc, XP/sao, BXH cá nhân và nhóm, huy hiệu.
+Web game nội bộ VNPT Đắk Lắk: "học mà chơi" văn hóa, quy tắc, tình huống thực tế, ATVSLĐ-5S,
+quy trình, ứng dụng AI. Cấu trúc **Bản đồ → Chặng → Level → Mini-game → Sao → Mở khóa** (kiểu Candy Crush),
+phong cách hình ảnh tham khảo Gunny, cuối mỗi chặng là Boss Challenge bắn góc/lực. Robot VNPT đồng hành.
 
-**Trạng thái:** MVP giao diện (chưa có backend, dữ liệu là mock). Xem [docs/roadmap.md](docs/roadmap.md).
+**Trạng thái:** demo v0.2 theo kịch bản BTC, chưa có backend (tiến độ lưu localStorage, dữ liệu BXH là mock).
+Xem [docs/game-design.md](docs/game-design.md) và [docs/roadmap.md](docs/roadmap.md).
 
 ## Đọc gì trước
 
@@ -13,6 +14,7 @@ câu hỏi trắc nghiệm, màn Boss Fight kiểu bắn góc, XP/sao, BXH cá n
 | Hiểu kiến trúc, luồng dữ liệu | [docs/architecture.md](docs/architecture.md) |
 | Thêm màn hình / ải / sự kiện / asset | [docs/how-to.md](docs/how-to.md) |
 | Tạo/thay hình ảnh bằng AI (Scenario, Higgsfield) | [docs/asset-pipeline.md](docs/asset-pipeline.md) |
+| Kịch bản BTC ↔ tính năng đã làm (chặng, dạng game, thi đua, vận hành) | [docs/game-design.md](docs/game-design.md) |
 | Việc tiếp theo, quyết định đã chốt | [docs/roadmap.md](docs/roadmap.md) |
 
 ## Chạy
@@ -48,12 +50,18 @@ GameVNPT/
     │   ├── spritesheets/ atlases/ audio/ tilemaps/       # dành sẵn cho giai đoạn sau
     └── src/
         ├── main.ts            # khởi tạo Phaser + mount UI khi 'game:ready'
-        ├── config/            # assets.ts (manifest), layout.ts (toạ độ world), theme.ts (màu/font Phaser)
-        ├── core/              # events.ts (event bus có kiểu), screens.ts (ScreenId), display.ts (DPR, camera fit)
-        ├── data/              # types.ts (kiểu domain = hợp đồng API), mock.ts (dữ liệu giả)
+        ├── config/            # assets.ts (manifest), layout.ts (toạ độ world), theme.ts, demo.ts (công tắc demo)
+        ├── core/              # events.ts (bus), screens.ts, display.ts, progress.ts (tiến độ), scoring.ts (sao/điểm)
+        ├── data/
+        │   ├── content/       # NỘI DUNG: mỗi chặng 1 file (level + câu hỏi) — sửa nội dung ở đây
+        │   ├── game-types.ts  # kiểu spec của 10 dạng mini-game
+        │   ├── types.ts, mock.ts, selectors.ts   # người chơi/BXH/nhóm (mock → API)
         ├── scenes/            # Phaser: Boot -> Preloader -> Map | BossFight
-        ├── ui/                # lớp DOM: shell, router, screens/, components/, icons, dom helpers
-        └── styles/            # tokens.css, base.css, components.css, screens.css
+        ├── ui/
+        │   ├── games/         # 10 module mini-game + registry (index.ts)
+        │   ├── screens/       # home, chapter, level (+mystery), games, leaderboard, badges, group, share
+        │   └── components/, shell.ts, router.ts, icons.ts, dom.ts
+        └── styles/            # tokens.css, base.css, components.css, screens.css, games.css
 ```
 
 ## Quy tắc bắt buộc
@@ -71,16 +79,21 @@ GameVNPT/
 8. Canvas render ở độ phân giải thiết bị (`DPR`): toạ độ DOM phải nhân `DPR` khi dùng trong scene
    (đã gói trong `fitWorldToRect`).
 9. Nội dung đánh dấu `TODO(content)` là placeholder, phải thay bằng tài liệu chính thức của VNPT
-   (8 chuẩn mực hành vi, ngân hàng câu hỏi). Không tự bịa nội dung "chính thức".
+   (sổ tay văn hóa, chuẩn mực, quy trình, ATVSLĐ). Không tự bịa nội dung "chính thức".
+   Nội dung chỉ nằm trong `data/content/`; `id` level không được đổi sau khi phát hành (khóa tiến độ).
 10. Không dùng/copy asset, nhân vật, giao diện gốc của Gunny (bản quyền 7Road/VNG), chỉ lấy cảm hứng phong cách.
     Logo VNPT: dùng file chính thức do đơn vị cung cấp, không để AI vẽ lại.
+11. Mini-game mới = spec trong `data/game-types.ts` + module trong `ui/games/` + đăng ký registry
+    (xem docs/how-to.md). Game gọi `api.finish()`; không tự tính sao/lưu tiến độ.
+12. File kịch bản `.docx` của BTC là tài liệu nội bộ: không commit (đã có trong `.gitignore`).
 
 ## Kiểm tra sau khi sửa
 
 - `npx tsc --noEmit` trong `client/` phải sạch.
 - Chạy `npm run dev`, xem ở 3 cỡ: 1600×900, 1280×720, 390×844 (điện thoại). Bản đồ tự đổi bố cục
   ngang/dọc theo tỉ lệ vùng trống (`MAP_LAYOUTS` trong `config/layout.ts`).
-- Ở chế độ dev, `window.__PHASER_GAME__` trỏ tới instance Phaser để debug/playtest.
+- Ở chế độ dev, `window.__PHASER_GAME__` và `window.__BUS__` để debug/playtest.
+- Mini-game: menu **Chơi game** → "Chơi thử" từng dạng, chơi hết tới modal kết quả, không có lỗi console.
 
 ## Skill & công cụ có sẵn
 

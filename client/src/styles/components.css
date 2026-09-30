@@ -452,7 +452,7 @@
   transition: opacity 0.3s, transform 0.3s;
 }
 
-body[data-screen="boss"] .toast-root { top: 34%; }
+body[data-scene="BossFight"] .toast-root { top: 34%; }
 
 .toast .icon { color: var(--gold-500); }
 .toast.is-leaving { opacity: 0; transform: translateY(-8px); }

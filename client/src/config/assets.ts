@@ -28,10 +28,13 @@ export const ASSETS = {
   bldRule: svg('bld-rule', 'assets/images/buildings/bld-rule.svg'),
   bld5g: svg('bld-5g', 'assets/images/buildings/bld-5g.svg'),
   bldBoss: svg('bld-boss', 'assets/images/buildings/bld-boss.svg'),
-  bldMaster: svg('bld-master', 'assets/images/buildings/bld-master.svg'),
+  bldSafety: svg('bld-safety', 'assets/images/buildings/bld-safety.svg'),
+  bldProcess: svg('bld-process', 'assets/images/buildings/bld-process.svg'),
+  bldAi: svg('bld-ai', 'assets/images/buildings/bld-ai.svg'),
 } as const satisfies Record<string, AssetDef>;
 
 export type AssetKey = (typeof ASSETS)[keyof typeof ASSETS]['key'];
 
-/** Public URL for use in DOM <img> tags (same files Phaser loads). */
-export const assetUrl = (def: AssetDef): string => def.url;
+/** Public URL of an asset by key, for DOM <img> tags (same files Phaser loads). */
+export const assetUrlByKey = (key: string): string =>
+  (Object.values(ASSETS) as AssetDef[]).find((a) => a.key === key)?.url ?? ASSETS.island.url;

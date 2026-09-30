@@ -19,17 +19,25 @@ export interface GameEvents {
   'game:ready': void;
   /** Router switched screens. */
   'screen:changed': { id: ScreenId };
-  /** Player clicked an island on the map. */
-  'stage:select': { stageId: number };
+  /** Player clicked a chapter island on the map. */
+  'chapter:select': { chapterId: string };
+  /** Progress store changed (level finished, reset, …). */
+  'progress:changed': void;
   /**
    * The current screen's free area (element with [data-safe-area]) that the
    * active scene should fit its world into; null = whole viewport.
    */
   'layout:safe-area': ViewRect | null;
-  /** Boss HUD changed aim. */
-  'boss:aim': { angle: number; power: number };
-  /** Boss HUD pressed fire (demo only in MVP). */
-  'boss:fire': { angle: number; power: number };
+  /** Boss HUD changed aim / wind. */
+  'boss:aim': { angle: number; power: number; wind: number };
+  /** Boss HUD fires a shot; `damage` is shown if it hits. */
+  'boss:fire': { angle: number; power: number; damage: number };
+  /** BossFightScene reports where the shot landed. */
+  'boss:shot-landed': { hit: boolean };
+  /** Boss counter-attacks the player (wrong answer). */
+  'boss:attack': void;
+  /** Boss HP reached 0: play the defeat animation. */
+  'boss:defeated': void;
 }
 
 type Handler<T> = (payload: T) => void;

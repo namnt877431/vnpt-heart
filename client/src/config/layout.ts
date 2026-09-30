@@ -23,27 +23,29 @@ export interface MapLayout {
  * and restarts itself when it flips (e.g. phone rotated).
  */
 export const MAP_LAYOUTS: Record<'landscape' | 'portrait', MapLayout> = {
-  // wide & short: zig-zag left → right
+  // wide & short: zig-zag left → right (one island per chapter, keyed by Chapter.order)
   landscape: {
-    view: { x: 0, y: 0, width: 1600, height: 720 },
+    view: { x: 0, y: 0, width: 1820, height: 720 },
     positions: {
-      1: { x: 220, y: 470 },
-      2: { x: 520, y: 250 },
-      3: { x: 810, y: 470 },
-      4: { x: 1100, y: 250 },
-      5: { x: 1390, y: 450 },
+      1: { x: 170, y: 470 },
+      2: { x: 470, y: 250 },
+      3: { x: 770, y: 470 },
+      4: { x: 1070, y: 250 },
+      5: { x: 1370, y: 470 },
+      6: { x: 1660, y: 250 },
     },
     labelScale: 1,
   },
   // tall & narrow (phones): zig-zag bottom → top
   portrait: {
-    view: { x: 0, y: -40, width: 720, height: 1360 },
+    view: { x: 0, y: -60, width: 720, height: 1660 },
     positions: {
-      1: { x: 210, y: 1110 },
-      2: { x: 510, y: 880 },
-      3: { x: 210, y: 650 },
-      4: { x: 510, y: 420 },
-      5: { x: 230, y: 210 },
+      1: { x: 210, y: 1350 },
+      2: { x: 510, y: 1120 },
+      3: { x: 210, y: 890 },
+      4: { x: 510, y: 660 },
+      5: { x: 210, y: 430 },
+      6: { x: 510, y: 200 },
     },
     labelScale: 1.35,
   },

@@ -3,6 +3,7 @@ import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
 import './styles/screens.css';
+import './styles/games.css';
 import { DPR } from './core/display';
 import { bus } from './core/events';
 import { BootScene } from './scenes/BootScene';
@@ -10,7 +11,6 @@ import { BossFightScene } from './scenes/BossFightScene';
 import { MapScene } from './scenes/MapScene';
 import { PreloaderScene } from './scenes/PreloaderScene';
 import { createRouter } from './ui/router';
-import { openStageDetail } from './ui/screens/stage-detail';
 import { bindShell, mountShell } from './ui/shell';
 
 /**
@@ -36,13 +36,13 @@ bus.on('game:ready', () => {
   const screenRoot = mountShell(ui);
   const router = createRouter(game, screenRoot);
   bindShell(ui, router);
-  bus.on('stage:select', ({ stageId }) => {
+  bus.on('chapter:select', ({ chapterId }) => {
     // islands are only clickable on the home screen (elsewhere the map is a dimmed backdrop)
-    if (router.current() === 'home') openStageDetail(stageId, router);
+    if (router.current() === 'home') router.go('chapter', { chapterId });
   });
   router.go('home');
   document.body.classList.add('is-ready');
 });
 
 // Exposed for playtesting/debugging in dev builds only.
-if (import.meta.env.DEV) (window as unknown as { __PHASER_GAME__: Phaser.Game }).__PHASER_GAME__ = game;
+if (import.meta.env.DEV) Object.assign(window, { __PHASER_GAME__: game, __BUS__: bus });

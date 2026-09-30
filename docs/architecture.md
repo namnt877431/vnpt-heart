@@ -11,69 +11,81 @@
 │   #modal-root, #toast-root ── ui/components/overlay.ts                   │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ #game-container (Phaser canvas, z-index 0, trong suốt, full màn hình)    │
-│   MapScene | BossFightScene                                              │
+│   MapScene (bản đồ chặng) | BossFightScene (đấu trường Boss)             │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **DOM** lo mọi thứ có chữ/số: menu, bảng xếp hạng, hồ sơ, câu hỏi, HUD trận đấu.
-  Lý do: chữ tiếng Việt sắc nét, responsive dễ, dễ tiếp cận (a11y), dễ bảo trì.
-- **Phaser** lo thế giới game: đảo bay, đường nối, mây, robot, boss, quỹ đạo, cháy nổ.
+- **DOM** lo mọi thứ có chữ/số: menu, BXH, hồ sơ, toàn bộ mini-game, HUD trận Boss.
+- **Phaser** lo thế giới game: đảo bay, mây, robot, Boss, quỹ đạo đạn, cháy nổ.
 
-## Luồng khởi động
+## Các tầng mã nguồn
 
 ```
-main.ts
- └─ new Phaser.Game(scene: [Boot, Preloader, Map, BossFight])
-      Boot       – chờ web font (Baloo 2, Be Vietnam Pro) tải xong
-      Preloader  – tải toàn bộ ASSETS (config/assets.ts), tạo texture nhỏ (sparkle, dot, shot)
-                 – start('Map') rồi bus.emit('game:ready')
- └─ bus.on('game:ready') → mountShell() → createRouter() → router.go('home')
+data/content/*   nội dung (chặng, level, câu hỏi)      ← BTC/biên tập sửa ở đây
+data/game-types  kiểu spec của 10 dạng mini-game
+data/mock        dữ liệu giả (người chơi, BXH, nhóm)   ← thay bằng API
+data/selectors   giá trị sống: điểm/cấp của tôi, BXH đã trộn điểm của tôi
+core/progress    tiến độ (sao, điểm, mở khóa) – demo: localStorage
+core/scoring     luật sao & điểm
+core/events      event bus UI ↔ Phaser
+ui/games/*       10 module mini-game (DOM) + registry
+ui/screens/*     màn hình (home, chapter, level, games, leaderboard, badges, group, share)
+scenes/*         Phaser: Boot → Preloader → Map | BossFight
+```
+
+## Luồng chơi
+
+```
+home (MapScene) --click đảo--> chapter (đường level) --click level--> level
+level: resolve(params) → spec → ui/games/<type>.mount(root, spec, api)
+       api.finish(result) → starsFor/pointsFor → progress.recordResult → modal kết quả
+       mystery: lật thẻ → phần thưởng ngay hoặc go('level', { levelId, spec: <game bất ngờ> })
+       spec.type === 'boss' → router chạy BossFightScene thay vì MapScene
 ```
 
 ## Event bus (`src/core/events.ts`)
-
-Kênh duy nhất giữa UI và scene. Có kiểu đầy đủ qua interface `GameEvents`.
-`bus.latest(event)` trả payload gần nhất (scene khởi động muộn vẫn đọc được layout).
 
 | Sự kiện | Phát bởi | Nghe bởi | Ý nghĩa |
 |---|---|---|---|
 | `game:ready` | PreloaderScene | main.ts | asset xong, mount UI |
 | `screen:changed` | router | shell (tô sáng menu) | đã đổi màn |
-| `stage:select` | MapScene (click đảo) | main.ts → mở modal chi tiết ải | chỉ xử lý khi đang ở `home` |
+| `chapter:select` | MapScene (click đảo) | main.ts → `go('chapter')` | chỉ xử lý khi đang ở `home` |
+| `progress:changed` | core/progress | MapScene (vẽ lại tiến độ đảo) | có kết quả mới / reset |
 | `layout:safe-area` | ui/safe-area.ts | MapScene, BossFightScene | vùng trống (CSS px) để fit camera; `null` = full màn |
-| `boss:aim` | ui/screens/boss.ts | BossFightScene | đổi góc/lực → vẽ lại đường ngắm |
-| `boss:fire` | ui/screens/boss.ts | BossFightScene | bắn (demo) |
+| `boss:aim` | ui/games/boss.ts | BossFightScene | góc, lực, gió → vẽ đường ngắm |
+| `boss:fire` | ui/games/boss.ts | BossFightScene | bắn (kèm sát thương hiển thị) |
+| `boss:shot-landed` | BossFightScene | ui/games/boss.ts | trúng/trượt → trừ máu Boss hoặc cho bắn lại |
+| `boss:attack` | ui/games/boss.ts | BossFightScene | trả lời sai → Boss phản công |
+| `boss:defeated` | ui/games/boss.ts | BossFightScene | hiệu ứng Boss bị hạ |
+
+`bus.latest(event)` trả payload gần nhất (scene khởi động muộn vẫn đọc được layout).
+Dev build: `window.__BUS__`, `window.__PHASER_GAME__` để playtest.
 
 ## Router & màn hình (`src/ui/router.ts`, `src/ui/screens/`)
 
-- `ScreenId` = `'home' | 'play' | 'leaderboard' | 'badges' | 'group' | 'boss'` (`core/screens.ts`).
-- Mỗi màn là một `ScreenModule { id, scene, mount(root, ctx) → cleanup }` (`screens/types.ts`),
-  đăng ký trong `screens/index.ts`.
-- `router.go(id, params)`:
-  1. gọi cleanup của màn cũ (gỡ listener, timer, safe-area);
-  2. nếu màn mới cần scene khác (`Map` ↔ `BossFight`) thì stop/start scene;
-  3. đặt `body[data-screen=id]` (CSS dùng để làm mờ bản đồ phía sau các màn dạng panel);
-  4. `mount()` màn mới.
+- `ScreenModule { id, scene, mount(root, ctx) → cleanup }`; `scene` có thể là hàm của params
+  (màn `level` chọn `BossFight` khi spec là boss).
+- `router.go(id, params)`: cleanup màn cũ → đổi/restart scene nếu cần → đặt
+  `body[data-screen]` + `body[data-scene]` (CSS dùng để làm mờ bản đồ, đổi nền) → `mount()`.
 - Click trong màn dùng `onAction(root, { 'ten-action': handler })` với `data-action="ten-action"`.
+
+## Mini-game (`src/ui/games/`)
+
+- Hợp đồng `GameModule { type, scene?, fullScreen?, mount(root, spec, api) → { destroy, timeout? } }`.
+- `GameApi`: `finish(result)`, `robot(text, mood)`, `exit()`. Màn `level` đo thời gian, chạy đồng hồ
+  (`spec.timeLimitSec`), tính sao/điểm, lưu tiến độ, hiện kết quả + giải thích.
+- `renderQuestion()` trong `choice.ts` là khối câu hỏi dùng chung (choice, investigate, escape, boss).
 
 ## Camera & độ phân giải
 
-- Game size = kích thước CSS × `DPR` (tối đa 2), `scale.zoom = 1/DPR` → canvas sắc nét trên màn Retina.
-- Mỗi scene khai báo một **view rect** trong world (`config/layout.ts`) và gọi
-  `fitWorldToRect(camera, …, view, bus.latest('layout:safe-area'))` khi khởi động, khi resize,
-  và khi UI báo safe-area mới.
-- MapScene có 2 bố cục (`MAP_LAYOUTS.landscape | portrait`), chọn theo tỉ lệ safe-area
-  (`mapLayoutFor`); khi tỉ lệ đổi chiều thì `scene.restart()`.
+- Game size = kích thước CSS × `DPR` (tối đa 2), `scale.zoom = 1/DPR` → canvas sắc nét trên Retina.
+- Mỗi scene có **view rect** (`config/layout.ts`), fit vào `layout:safe-area` bằng `fitWorldToRect`.
+- MapScene có 2 bố cục (`MAP_LAYOUTS.landscape | portrait`) chọn theo tỉ lệ safe-area; đổi chiều → `scene.restart()`.
 
-## Lưu ý về input
+## Lưu ý
 
-Phaser nhận cả sự kiện `pointerup` khi người dùng nhả chuột trên phần tử DOM nằm đè lên canvas.
-Mọi handler click trong scene phải kiểm tra `pointer.event?.target === this.game.canvas`
-(xem `MapScene.createIsland`).
-
-## Dữ liệu
-
-`src/data/types.ts` là hợp đồng kiểu cho API tương lai (Player, Stage, RankEntry, GroupRank,
-Badge, Mission, QuizQuestion, BossInfo). `src/data/mock.ts` cung cấp dữ liệu giả cùng kiểu.
-Khi có backend: tạo `src/data/api.ts` trả về cùng kiểu, thay import ở từng màn.
-Đáp án câu hỏi **không** được gửi xuống client; server chấm điểm.
+- Phaser nhận cả `pointerup` khi thả chuột trên DOM đè lên canvas: handler click trong scene phải
+  kiểm tra `pointer.event?.target === this.game.canvas` (xem `MapScene.createIsland`).
+- **Bảo mật đáp án:** demo gửi đáp án xuống trình duyệt. Khi có backend, server giữ `correct`/`answer`
+  và chấm điểm; client chỉ gửi lựa chọn.
+- Tiến độ demo lưu `localStorage` key `vnpt-heart:progress:v1` (chỉ trên máy đó).

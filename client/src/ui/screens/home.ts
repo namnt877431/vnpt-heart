@@ -1,7 +1,9 @@
 import { ASSETS } from '../../config/assets';
-import { me, monthlyGroups, stages, todayMission, weeklyPlayers } from '../../data/mock';
+import { currentChapter, nextLevelIndex, resetProgress } from '../../core/progress';
+import { me, monthlyGroups, todayMission } from '../../data/mock';
+import { leaderboard, playerStats } from '../../data/selectors';
 import { avatar } from '../components/avatar';
-import { comingSoon, openModal } from '../components/overlay';
+import { comingSoon, openModal, toast } from '../components/overlay';
 import { progressBar } from '../components/progress';
 import { groupRankList, playerRankList } from '../components/rank-list';
 import { $, $$, esc, fmt, onAction } from '../dom';
@@ -11,7 +13,7 @@ import type { ScreenModule } from './types';
 
 const DOCK = [
   { action: 'badges', label: 'Bảng thành tích', icon: 'trophy' },
-  { action: 'gifts', label: 'Kho quà', icon: 'gift' },
+  { action: 'share', label: 'Chia sẻ tình huống', icon: 'chat' },
   { action: 'guide', label: 'Hướng dẫn', icon: 'book' },
   { action: 'settings', label: 'Cài đặt', icon: 'gear' },
 ];
@@ -21,7 +23,9 @@ export const homeScreen: ScreenModule = {
   id: 'home',
   scene: 'Map',
   mount(root, { go }) {
-    const current = stages.find((s) => s.status === 'current') ?? stages[0];
+    const stats = playerStats();
+    const chapter = currentChapter();
+    const nextLevel = chapter.levels[nextLevelIndex(chapter)];
 
     root.innerHTML = `
       <div class="home">
@@ -35,11 +39,11 @@ export const homeScreen: ScreenModule = {
               </div>
             </div>
             <div class="profile-card__level">
-              <span class="level-tag">Lv.${String(me.level).padStart(2, '0')}</span>
-              <small>${me.xp} / ${me.xpNext} XP</small>
+              <span class="level-tag">Lv.${String(stats.level).padStart(2, '0')}</span>
+              <small>${stats.xpInLevel} / ${stats.xpNext} XP</small>
             </div>
-            ${progressBar(me.xp, me.xpNext, 'xp')}
-            <div class="profile-card__stars">${icon('star', 30, 'c-gold')}<b>${fmt(me.stars)}</b></div>
+            ${progressBar(stats.xpInLevel, stats.xpNext, 'xp')}
+            <div class="profile-card__stars">${icon('star', 30, 'c-gold')}<b>${fmt(stats.points)}</b><span class="season-chip">Mùa 1</span></div>
             <button class="btn btn--blue btn--sm btn--block" data-action="profile">Xem chi tiết ${icon('chevronRight', 16)}</button>
           </section>
           <p class="slogan">Cùng VNPT<br/>kiến tạo công nghệ<br/>vì cộng đồng ${icon('heart', 18)}</p>
@@ -66,7 +70,7 @@ export const homeScreen: ScreenModule = {
               <button class="seg__btn is-active" data-action="lb-tab" data-tab="players">Cá nhân</button>
               <button class="seg__btn" data-action="lb-tab" data-tab="groups">Nhóm</button>
             </div>
-            <div class="lb-card__list" data-list="players">${playerRankList(weeklyPlayers.slice(0, 5), me.id)}</div>
+            <div class="lb-card__list" data-list="players">${playerRankList(leaderboard('week').slice(0, 5), me.id)}</div>
             <div class="lb-card__list" data-list="groups" hidden>${groupRankList(monthlyGroups, me.groupId)}</div>
           </section>
           <section class="panel lb-card">
@@ -109,14 +113,22 @@ export const homeScreen: ScreenModule = {
     const home = $(root, '.home');
     const stopSafe = watchSafeArea($(home, '.home__map'));
     const stopActions = onAction(home, {
-      start: () => go(current.mode === 'boss' ? 'boss' : 'play', { stageId: current.id }),
+      start: () => go('level', { levelId: nextLevel.id }),
       leaderboard: () => go('leaderboard'),
       group: () => go('group'),
       badges: () => go('badges'),
       profile: () => comingSoon('Hồ sơ chi tiết'),
       mission: () => comingSoon('Chi tiết nhiệm vụ'),
-      gifts: () => comingSoon('Kho quà'),
-      settings: () => comingSoon('Cài đặt'),
+      share: () => go('share'),
+      settings: () => openModal(SETTINGS_HTML, {
+        title: 'CÀI ĐẶT',
+        onMount: (el, close) => el.querySelector('[data-reset]')?.addEventListener('click', () => {
+          resetProgress();
+          close();
+          go('home');
+          toast('Đã đặt lại tiến độ demo', 'gear');
+        }),
+      }),
       guide: () => openModal(GUIDE_HTML, { title: 'HƯỚNG DẪN', className: 'modal--guide' }),
       'lb-tab': (el) => {
         const tab = el.dataset.tab!;
@@ -134,8 +146,17 @@ export const homeScreen: ScreenModule = {
 
 const GUIDE_HTML = `
   <ol class="guide-list">
-    <li>${icon('map', 22)}<span><b>Chọn ải trên bản đồ.</b> Mỗi hòn đảo là một ải; hoàn thành ải trước để mở ải sau.</span></li>
-    <li>${icon('bulb', 22)}<span><b>Trả lời câu hỏi.</b> Đúng nhanh được nhiều sao; sai vẫn được xem giải thích.</span></li>
-    <li>${icon('target', 22)}<span><b>Boss Fight.</b> Trả lời đúng để giành lượt bắn, chỉnh góc và lực để hạ boss.</span></li>
-    <li>${icon('users', 22)}<span><b>Thi đua nhóm.</b> Điểm của bạn cộng vào điểm trung bình của nhóm.</span></li>
+    <li>${icon('map', 22)}<span><b>Bản đồ → Chặng → Level.</b> Mỗi hòn đảo là một chặng nội dung; mỗi chặng gồm nhiều level, hoàn thành level trước để mở level sau.</span></li>
+    <li>${icon('gamepad', 22)}<span><b>Mỗi level một trò chơi khác nhau:</b> Nếu là bạn?, Soi lỗi, Chọn cách nói, Ghép đúng, Sắp xếp, Time Attack, Tìm mối nguy, Điều tra sự cố, Escape Room…</span></li>
+    <li>${icon('star', 22)}<span><b>Sao:</b> ⭐ hoàn thành · ⭐⭐ hoàn thành tốt · ⭐⭐⭐ nhanh và chính xác. Chơi lại để cải thiện.</span></li>
+    <li>${icon('book', 22)}<span><b>Xem giải thích</b> sau mỗi level để ghi nhớ kiến thức.</span></li>
+    <li>${icon('target', 22)}<span><b>Boss Challenge</b> cuối mỗi chặng: trả lời đúng để giành lượt bắn, chỉnh góc và lực để hạ Boss.</span></li>
+    <li>${icon('users', 22)}<span><b>Thi đua:</b> BXH tuần, tháng, toàn mùa; điểm nhóm tính theo điểm trung bình, tỷ lệ tham gia và thành tích trong kỳ.</span></li>
   </ol>`;
+
+const SETTINGS_HTML = `
+  <div class="settings">
+    <p>${icon('gear', 18)} Âm thanh, nhạc nền: sẽ có ở phiên bản sau.</p>
+    <p>${icon('shield', 18)} Bản demo lưu tiến độ ngay trên trình duyệt này.</p>
+    <button class="btn btn--ghost" data-reset>${icon('x', 18)} Đặt lại tiến độ demo</button>
+  </div>`;

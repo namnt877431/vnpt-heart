@@ -9,21 +9,24 @@ import { bus } from '../core/events';
 const GRAVITY = 600;
 const POWER_TO_SPEED = 11;
 const WIND_ACCEL = 18; // px/s² per wind unit
-const WIND = -2; // MVP: fixed; later comes from the turn state
 
 const PLAYER_X = 300;
 const BOSS_X = 1250;
 
 /**
- * Boss fight arena (stage 4). MVP scope: renders the arena, aims the cannon
- * from `boss:aim`, and plays a demo shot on `boss:fire`. No turn logic yet.
+ * Boss Challenge arena. Presentation only — the turn/answer logic lives in
+ * the HUD (src/ui/games/boss.ts). Listens: boss:aim, boss:fire, boss:attack,
+ * boss:defeated. Emits: boss:shot-landed.
  */
 export class BossFightScene extends Phaser.Scene {
   private cannon!: Phaser.GameObjects.Container;
   private aimGfx!: Phaser.GameObjects.Graphics;
   private bossImg!: Phaser.GameObjects.Image;
+  private robot!: Phaser.GameObjects.Image;
   private angle = 45;
   private power = 70;
+  private wind = 0;
+  private damage = 0;
   private shot: { img: Phaser.GameObjects.Image; vx: number; vy: number } | null = null;
 
   constructor() {
@@ -41,12 +44,15 @@ export class BossFightScene extends Phaser.Scene {
 
     const offs = [
       bus.on('layout:safe-area', () => this.fitCamera()),
-      bus.on('boss:aim', ({ angle, power }) => {
+      bus.on('boss:aim', ({ angle, power, wind }) => {
         this.angle = angle;
         this.power = power;
+        this.wind = wind;
         this.drawAim();
       }),
-      bus.on('boss:fire', ({ angle, power }) => this.fire(angle, power)),
+      bus.on('boss:fire', ({ angle, power, damage }) => this.fire(angle, power, damage)),
+      bus.on('boss:attack', () => this.bossAttack()),
+      bus.on('boss:defeated', () => this.bossDefeated()),
     ];
     this.scale.on(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -60,7 +66,7 @@ export class BossFightScene extends Phaser.Scene {
     if (!this.shot) return;
     const dt = delta / 1000;
     const s = this.shot;
-    s.vx += WIND * WIND_ACCEL * dt;
+    s.vx += this.wind * WIND_ACCEL * dt;
     s.vy += GRAVITY * dt;
     s.img.x += s.vx * dt;
     s.img.y += s.vy * dt;
@@ -118,6 +124,7 @@ export class BossFightScene extends Phaser.Scene {
     const y = groundY(PLAYER_X);
     this.add.ellipse(PLAYER_X, y + 4, 150, 22, 0x000000, 0.2).setDepth(19);
     const robot = this.add.image(PLAYER_X, y + 6, ASSETS.robot.key).setOrigin(0.5, 1).setScale(0.4).setDepth(20);
+    this.robot = robot;
     this.tweens.add({ targets: robot, scaleY: 0.41, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
 
     this.cannon = this.add.container(PLAYER_X + 40, y - 70).setDepth(21);
@@ -161,7 +168,7 @@ export class BossFightScene extends Phaser.Scene {
     const steps = 14;
     for (let i = 1; i <= steps; i++) {
       const t = i * 0.07;
-      const x = m.x + m.vx * t + 0.5 * WIND * WIND_ACCEL * t * t;
+      const x = m.x + m.vx * t + 0.5 * this.wind * WIND_ACCEL * t * t;
       const y = m.y + m.vy * t + 0.5 * GRAVITY * t * t;
       const a = 1 - i / (steps + 2);
       g.fillStyle(0xffffff, a).fillCircle(x, y, 7 - i * 0.3);
@@ -171,10 +178,11 @@ export class BossFightScene extends Phaser.Scene {
 
   // ---------------------------------------------------------- demo shot
 
-  private fire(angle: number, power: number): void {
+  private fire(angle: number, power: number, damage: number): void {
     if (this.shot) return;
     this.angle = angle;
     this.power = power;
+    this.damage = damage;
     this.drawAim();
     const m = this.muzzle();
     const img = this.add.image(m.x, m.y, 'shot').setDepth(40);
@@ -203,10 +211,68 @@ export class BossFightScene extends Phaser.Scene {
 
     if (hitBoss) {
       this.tweens.add({ targets: this.bossImg, alpha: 0.35, duration: 60, yoyo: true, repeat: 3 });
-      const dmg = this.add.text(BOSS_X, groundY(BOSS_X) - 440, '-120', outlinedText(56, '#ff4d5e', '#ffffff')).setOrigin(0.5).setDepth(50);
-      this.tweens.add({ targets: dmg, y: dmg.y - 90, alpha: 0, duration: 1100, ease: 'Cubic.out', onComplete: () => dmg.destroy() });
+      this.floatText(BOSS_X, groundY(BOSS_X) - 440, `-${this.damage}`, '#ff4d5e');
+    } else {
+      this.floatText(x, y - 60, 'TRƯỢT!', '#ffffff');
     }
-    this.time.delayedCall(700, () => this.aimGfx.setVisible(true));
+    this.time.delayedCall(700, () => {
+      this.aimGfx.setVisible(true);
+      bus.emit('boss:shot-landed', { hit: hitBoss });
+    });
+  }
+
+  /** Wrong answer: the boss lobs a storm orb at the player. */
+  private bossAttack(): void {
+    const from = { x: BOSS_X - 120, y: groundY(BOSS_X) - 260 };
+    const to = { x: PLAYER_X, y: groundY(PLAYER_X) - 120 };
+    const orb = this.add.image(from.x, from.y, 'dot').setTint(0x7a2fd8).setScale(3).setDepth(40);
+    this.tweens.add({ targets: this.bossImg, x: BOSS_X - 30, duration: 120, yoyo: true });
+    this.tweens.addCounter({
+      from: 0, to: 1, duration: 800, ease: 'Sine.in',
+      onUpdate: (tw) => {
+        const t = tw.getValue() ?? 0;
+        orb.x = Phaser.Math.Linear(from.x, to.x, t);
+        orb.y = Phaser.Math.Linear(from.y, to.y, t) - Math.sin(t * Math.PI) * 220;
+        if (Math.random() < 0.5) this.puff(orb.x, orb.y, 0xb79bff, 7, 300);
+      },
+      onComplete: () => {
+        orb.destroy();
+        this.cameras.main.shake(260, 0.01);
+        this.tweens.add({ targets: this.robot, alpha: 0.3, duration: 70, yoyo: true, repeat: 3 });
+        this.floatText(to.x, to.y - 180, '-1 ♥', '#b79bff');
+        for (let i = 0; i < 14; i++) {
+          const p = this.add.image(to.x, to.y, 'dot').setDepth(45).setTint(i % 2 ? 0x7a2fd8 : 0xffe08a);
+          const a = Phaser.Math.FloatBetween(0, Math.PI * 2);
+          this.tweens.add({ targets: p, x: to.x + Math.cos(a) * 90, y: to.y + Math.sin(a) * 90, alpha: 0, scale: 0.1, duration: 500, onComplete: () => p.destroy() });
+        }
+      },
+    });
+  }
+
+  /** Boss HP hit 0: wobble, burst, vanish. */
+  private bossDefeated(): void {
+    const b = this.bossImg;
+    this.tweens.killTweensOf(b);
+    this.tweens.add({
+      targets: b, angle: { from: -6, to: 6 }, duration: 80, yoyo: true, repeat: 6,
+      onComplete: () => {
+        const cx = b.x;
+        const cy = b.y - b.displayHeight / 2;
+        for (let i = 0; i < 40; i++) {
+          const p = this.add.image(cx, cy, 'sparkle').setDepth(45).setTint([0xffe08a, 0xffffff, 0x8a5cf0][i % 3]);
+          const a = Phaser.Math.FloatBetween(0, Math.PI * 2);
+          const d = Phaser.Math.Between(80, 260);
+          this.tweens.add({ targets: p, x: cx + Math.cos(a) * d, y: cy + Math.sin(a) * d, alpha: 0, angle: 180, duration: 900, ease: 'Cubic.out', onComplete: () => p.destroy() });
+        }
+        this.tweens.add({ targets: b, scale: 0, alpha: 0, duration: 450, ease: 'Back.in' });
+        this.cameras.main.flash(250, 255, 255, 255);
+      },
+    });
+  }
+
+  private floatText(x: number, y: number, text: string, color: string): void {
+    const t = this.add.text(x, y, text, outlinedText(52, color, '#0a2266')).setOrigin(0.5).setDepth(50);
+    this.tweens.add({ targets: t, y: y - 90, alpha: 0, duration: 1100, ease: 'Cubic.out', onComplete: () => t.destroy() });
   }
 
   private puff(x: number, y: number, tint: number, size: number, life: number): void {

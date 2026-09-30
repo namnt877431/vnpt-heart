@@ -1,9 +1,10 @@
-import type { BossInfo, Badge, GroupRank, Mission, Player, QuizQuestion, RankEntry, Stage } from './types';
+import type { Badge, GroupRank, Honor, Mission, Player, RankEntry, RankPeriod } from './types';
 
 /**
- * MVP mock data. Replace with API calls (keep names/return types) when the
- * backend exists. Content marked TODO(content) is placeholder text that the
- * culture/HR team must replace with official VNPT material.
+ * Mock data for the demo. Replace with API calls (keep names/return types)
+ * when the backend exists. Content marked TODO(content) is placeholder text
+ * that the culture/HR team must replace with official VNPT material.
+ * Live values (my points, my rank) are merged in data/selectors.ts.
  */
 
 export const me: Player = {
@@ -11,65 +12,60 @@ export const me: Player = {
   name: 'Nguyễn Thị Lan',
   role: 'NV Kinh doanh',
   groupId: 'g-kd',
-  level: 3,
-  xp: 320,
-  xpNext: 600,
-  stars: 1250,
-  weeklyRank: 2,
+  basePoints: 1250,
+  baseXp: 720,
 };
 
-export const stages: Stage[] = [
-  {
-    id: 1, title: 'VNPT HEART', subtitle: '8 chuẩn mực hành vi',
-    description: 'Làm quen với 8 chuẩn mực hành vi của người VNPT qua các câu hỏi ngắn.',
-    building: 'bld-heart', status: 'current', starsEarned: 2, maxStars: 3,
-    questionCount: 10, rewardXp: 120, mode: 'quiz',
-  },
-  {
-    id: 2, title: 'VNPT RULE', subtitle: 'Quy tắc ứng xử',
-    description: 'Quy tắc ứng xử với khách hàng, đồng nghiệp và đối tác.',
-    building: 'bld-rule', status: 'locked', starsEarned: 0, maxStars: 3,
-    questionCount: 12, rewardXp: 150, mode: 'quiz',
-  },
-  {
-    id: 3, title: 'THỰC CHIẾN', subtitle: 'Tình huống thực tế',
-    description: 'Xử lý các tình huống thực tế tại quầy giao dịch và hiện trường kỹ thuật.',
-    building: 'bld-5g', status: 'locked', starsEarned: 0, maxStars: 3,
-    questionCount: 12, rewardXp: 180, mode: 'quiz',
-  },
-  {
-    id: 4, title: 'BOSS FIGHT', subtitle: 'Thử thách nâng cao',
-    description: 'Trả lời đúng để giành lượt bắn, hạ gục Quái Thờ Ơ theo phong cách bắn góc.',
-    building: 'bld-boss', status: 'locked', starsEarned: 0, maxStars: 3,
-    questionCount: 8, rewardXp: 250, mode: 'boss',
-  },
-  {
-    id: 5, title: 'VNPT MASTER', subtitle: 'Chinh phục toàn diện',
-    description: 'Tổng hợp toàn bộ kiến thức, trở thành Đại sứ văn hóa VNPT Đắk Lắk.',
-    building: 'bld-master', status: 'locked', starsEarned: 0, maxStars: 3,
-    questionCount: 15, rewardXp: 400, mode: 'quiz',
-  },
-];
+const P = (rank: number, playerId: string, name: string, role: string, score: number): RankEntry => ({ rank, playerId, name, role, score });
 
-export const weeklyPlayers: RankEntry[] = [
-  { rank: 1, playerId: 'u-dung', name: 'Lê Văn Dũng', role: 'NV Kỹ thuật', score: 2450 },
-  { rank: 2, playerId: 'u-lan', name: 'Nguyễn Thị Lan', role: 'NV Kinh doanh', score: 2320 },
-  { rank: 3, playerId: 'u-hoang', name: 'Trần Minh Hoàng', role: 'NV Hạ tầng', score: 2180 },
-  { rank: 4, playerId: 'u-mai', name: 'Phạm Thị Mai', role: 'NV CSKH', score: 1950 },
-  { rank: 5, playerId: 'u-anh', name: 'Hoàng Đức Anh', role: 'NV Văn phòng', score: 1820 },
-  { rank: 6, playerId: 'u-thu', name: 'Đỗ Thị Thu', role: 'NV Kinh doanh', score: 1760 },
-  { rank: 7, playerId: 'u-nam', name: 'Vũ Hải Nam', role: 'NV Kỹ thuật', score: 1690 },
-  { rank: 8, playerId: 'u-ha', name: 'Ngô Thanh Hà', role: 'NV CSKH', score: 1610 },
-  { rank: 9, playerId: 'u-son', name: 'Bùi Văn Sơn', role: 'NV Hạ tầng', score: 1540 },
-  { rank: 10, playerId: 'u-linh', name: 'Mai Khánh Linh', role: 'NV Văn phòng', score: 1480 },
-];
+/** Leaderboards per period (my own score is replaced with the live value). */
+export const players: Record<RankPeriod, RankEntry[]> = {
+  week: [
+    P(1, 'u-dung', 'Lê Văn Dũng', 'NV Kỹ thuật', 2450),
+    P(2, 'u-lan', 'Nguyễn Thị Lan', 'NV Kinh doanh', 2320),
+    P(3, 'u-hoang', 'Trần Minh Hoàng', 'NV Hạ tầng', 2180),
+    P(4, 'u-mai', 'Phạm Thị Mai', 'NV CSKH', 1950),
+    P(5, 'u-anh', 'Hoàng Đức Anh', 'NV Văn phòng', 1820),
+    P(6, 'u-thu', 'Đỗ Thị Thu', 'NV Kinh doanh', 1760),
+    P(7, 'u-nam', 'Vũ Hải Nam', 'NV Kỹ thuật', 1690),
+    P(8, 'u-ha', 'Ngô Thanh Hà', 'NV CSKH', 1610),
+    P(9, 'u-son', 'Bùi Văn Sơn', 'NV Hạ tầng', 1540),
+    P(10, 'u-linh', 'Mai Khánh Linh', 'NV Văn phòng', 1480),
+  ],
+  month: [
+    P(1, 'u-mai', 'Phạm Thị Mai', 'NV CSKH', 9120),
+    P(2, 'u-dung', 'Lê Văn Dũng', 'NV Kỹ thuật', 8870),
+    P(3, 'u-lan', 'Nguyễn Thị Lan', 'NV Kinh doanh', 8410),
+    P(4, 'u-hoang', 'Trần Minh Hoàng', 'NV Hạ tầng', 8020),
+    P(5, 'u-nam', 'Vũ Hải Nam', 'NV Kỹ thuật', 7650),
+    P(6, 'u-anh', 'Hoàng Đức Anh', 'NV Văn phòng', 7310),
+    P(7, 'u-ha', 'Ngô Thanh Hà', 'NV CSKH', 6980),
+    P(8, 'u-thu', 'Đỗ Thị Thu', 'NV Kinh doanh', 6540),
+  ],
+  season: [
+    P(1, 'u-dung', 'Lê Văn Dũng', 'NV Kỹ thuật', 24300),
+    P(2, 'u-mai', 'Phạm Thị Mai', 'NV CSKH', 23850),
+    P(3, 'u-hoang', 'Trần Minh Hoàng', 'NV Hạ tầng', 22100),
+    P(4, 'u-lan', 'Nguyễn Thị Lan', 'NV Kinh doanh', 21760),
+    P(5, 'u-son', 'Bùi Văn Sơn', 'NV Hạ tầng', 19980),
+    P(6, 'u-anh', 'Hoàng Đức Anh', 'NV Văn phòng', 18440),
+  ],
+};
 
 export const monthlyGroups: GroupRank[] = [
-  { rank: 1, groupId: 'g-kd', name: 'Nhóm Kinh doanh', avgScore: 1980, members: 24 },
-  { rank: 2, groupId: 'g-kt', name: 'Nhóm Kỹ thuật', avgScore: 1870, members: 31 },
-  { rank: 3, groupId: 'g-ht', name: 'Nhóm Hạ tầng', avgScore: 1760, members: 18 },
-  { rank: 4, groupId: 'g-vp', name: 'Nhóm Văn phòng', avgScore: 1680, members: 15 },
-  { rank: 5, groupId: 'g-cskh', name: 'Nhóm CSKH', avgScore: 1520, members: 22 },
+  { rank: 1, groupId: 'g-kd', name: 'Nhóm Kinh doanh', avgScore: 1980, members: 24, participation: 92, periodBonus: 300 },
+  { rank: 2, groupId: 'g-kt', name: 'Nhóm Kỹ thuật', avgScore: 1870, members: 31, participation: 84, periodBonus: 450 },
+  { rank: 3, groupId: 'g-ht', name: 'Nhóm Hạ tầng', avgScore: 1760, members: 18, participation: 89, periodBonus: 150 },
+  { rank: 4, groupId: 'g-vp', name: 'Nhóm Văn phòng', avgScore: 1680, members: 15, participation: 100, periodBonus: 0 },
+  { rank: 5, groupId: 'g-cskh', name: 'Nhóm CSKH', avgScore: 1520, members: 22, participation: 73, periodBonus: 200 },
+];
+
+/** "Ngoài điểm số" honours (script IV.3). The 3-star one is filled live. */
+export const honors: Honor[] = [
+  { title: 'Tích cực nhất', icon: 'bolt', playerId: 'u-mai', name: 'Phạm Thị Mai', value: '42 lượt chơi' },
+  { title: 'Tiến bộ nhất', icon: 'arrowUp', playerId: 'u-anh', name: 'Hoàng Đức Anh', value: 'Tăng 18 hạng' },
+  { title: 'Nhiều thử thách nhất', icon: 'flag', playerId: 'u-dung', name: 'Lê Văn Dũng', value: '36 level' },
+  { title: 'Nhiều 3 sao nhất', icon: 'star', playerId: 'u-hoang', name: 'Trần Minh Hoàng', value: '21 level ★★★' },
 ];
 
 // TODO(content): badge names are placeholders; replace with the official 8 behaviour standards.
@@ -89,28 +85,13 @@ export const badges: Badge[] = [
 ];
 
 export const todayMission: Mission = {
-  id: 'm-daily-1', title: 'Hoàn thành 1 thử thách Ải 02', progress: 0, target: 1, rewardStars: 50,
+  id: 'm-daily-1', title: 'Hoàn thành 1 level bất kỳ hôm nay', progress: 0, target: 1, rewardStars: 50,
 };
-
-// TODO(content): sample question; replace with the official question bank.
-export const sampleQuestion: QuizQuestion = {
-  id: 'q-1-3', stageId: 1, index: 3, total: 10, timeLimitSec: 30,
-  text: 'Khách hàng đến quầy phàn nàn gay gắt vì mạng bị gián đoạn nhiều ngày. Bạn nên làm gì đầu tiên?',
-  options: [
-    'Giải thích ngay rằng lỗi do bộ phận kỹ thuật, không phải do mình',
-    'Lắng nghe, xin lỗi và ghi nhận đầy đủ thông tin sự cố của khách hàng',
-    'Đề nghị khách hàng tự gọi tổng đài để được hỗ trợ',
-    'Hẹn khách quay lại hôm khác khi có cán bộ kỹ thuật',
-  ],
-  hint: 'Hãy đặt mình vào vị trí khách hàng: điều họ cần trước tiên là được lắng nghe.',
-};
-
-export const boss: BossInfo = { name: 'Quái Thờ Ơ', hp: 780, hpMax: 1000 };
 
 export const myGroup = {
   ...monthlyGroups[0],
   leader: 'Trần Văn Bình',
-  weeklyGoal: { progress: 18, target: 24, label: 'thành viên hoàn thành Ải 01' },
+  weeklyGoal: { progress: 18, target: 24, label: 'thành viên hoàn thành Chặng 1' },
   roster: [
     { rank: 1, playerId: 'u-lan', name: 'Nguyễn Thị Lan', role: 'NV Kinh doanh', score: 2320 },
     { rank: 2, playerId: 'u-thu', name: 'Đỗ Thị Thu', role: 'NV Kinh doanh', score: 1760 },

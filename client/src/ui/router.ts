@@ -23,14 +23,18 @@ export const createRouter = (game: Phaser.Game, root: HTMLElement): Router => {
     cleanup?.();
     cleanup = null;
 
-    if (screen.scene !== activeScene) {
+    const scene = typeof screen.scene === 'function' ? screen.scene(params) : screen.scene;
+    if (scene !== activeScene) {
       game.scene.stop(activeScene);
-      game.scene.start(screen.scene);
-      activeScene = screen.scene;
+      game.scene.start(scene);
+      activeScene = scene;
+    } else if (scene === 'BossFight') {
+      game.scene.getScene(scene)?.scene.restart(); // fresh arena for every boss attempt
     }
 
     current = id;
     document.body.dataset.screen = id;
+    document.body.dataset.scene = scene;
     root.innerHTML = '';
     root.scrollTop = 0;
     cleanup = screen.mount(root, { go, params });

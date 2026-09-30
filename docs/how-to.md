@@ -1,58 +1,64 @@
 # How-to: các thay đổi thường gặp
 
+## Sửa / thêm nội dung (không cần biết code game)
+
+Nội dung nằm trong `client/src/data/content/`, mỗi chặng một file. Mỗi level:
+
+```ts
+{ id: 'van-hoa-7', kind: 'normal', spec: { type: 'choice', title: '…', intro: '…', questions: [ … ] } }
+```
+
+- `id` phải **duy nhất** và **không đổi** sau khi phát hành (là khóa lưu tiến độ).
+- `kind`: `'normal'` | `'mystery'` (không cần `spec`) | `'boss'` (đặt cuối chặng, `spec.type = 'boss'`).
+- Các trường của từng `type` xem trong `client/src/data/game-types.ts` (có comment từng trường).
+- `timeLimitSec`: bật đồng hồ đếm ngược; `parTimeSec`: phải xong trong thời gian này mới được 3 sao.
+- Mỗi câu hỏi nên có `explain`, hiển thị trong phần "Xem kiến thức & giải thích".
+
+## Thêm một chặng mới
+
+1. Tạo `client/src/data/content/<id>.ts` export một `Chapter` (xem các file có sẵn).
+2. Thêm vào mảng `CHAPTERS` trong `data/content/index.ts` (thứ tự = `order`).
+3. Thêm vị trí đảo cho `order` mới trong **cả hai** bố cục `MAP_LAYOUTS.landscape/portrait`
+   (`client/src/config/layout.ts`); nếu quá chật thì nới `view.width/height`.
+4. Công trình trên đảo: thêm SVG/PNG vào `public/assets/images/buildings/` và khai báo trong
+   `config/assets.ts`; đặt `building` của chặng bằng key đó.
+
+## Thêm một dạng mini-game mới
+
+1. Khai báo spec trong `data/game-types.ts`: interface mới + thêm vào union `GameSpec` + thêm vào `GAME_TYPE_INFO`.
+2. Tạo `client/src/ui/games/<type>.ts` export một `GameModule` (xem `types.ts`):
+   - `mount(root, spec, api)` vẽ giao diện, khi xong gọi `api.finish({ correct, total, notes })`;
+   - dùng `api.robot(text, mood)` để robot phản hồi;
+   - trả về `{ destroy, timeout? }` (gỡ listener; `timeout` trả kết quả dở dang khi hết giờ).
+3. Đăng ký trong `ui/games/index.ts` (TypeScript báo lỗi nếu quên).
+4. CSS: thêm một section trong `client/src/styles/games.css`.
+5. Nếu game cần scene Phaser riêng (như Boss), đặt `scene: '<SceneKey>'` và `fullScreen: true`.
+
 ## Thêm một màn hình mới
 
 1. Thêm id vào `ScreenId` trong `client/src/core/screens.ts`.
-2. Tạo `client/src/ui/screens/<ten>.ts` theo mẫu:
-   ```ts
-   export const fooScreen: ScreenModule = {
-     id: 'foo',
-     scene: 'Map',                 // scene vẽ phía sau
-     mount(root, { go, params }) {
-       root.innerHTML = `<div class="screen screen--center"><section class="panel foo">…</section></div>`;
-       return onAction($(root, '.screen'), { back: () => go('home') });   // trả cleanup
-     },
-   };
-   ```
-3. Đăng ký trong `client/src/ui/screens/index.ts`.
-4. Nếu cần mục menu: thêm vào mảng `NAV` trong `client/src/ui/shell.ts`.
-5. CSS: thêm một section `/* ==== foo ==== */` trong `client/src/styles/screens.css`.
-   Nếu màn dạng panel che bản đồ, thêm `[data-screen="foo"]` vào selector làm mờ trong `styles/base.css`.
-
-## Thêm / sửa một ải
-
-- Dữ liệu ải: mảng `stages` trong `client/src/data/mock.ts` (sau này từ API).
-- Vị trí đảo: `MAP_LAYOUTS.landscape.positions` **và** `MAP_LAYOUTS.portrait.positions`
-  trong `client/src/config/layout.ts` (cả hai bố cục).
-- Công trình trên đảo: `building` = key asset trong `config/assets.ts`.
-- `mode: 'boss'` → mở màn Boss Fight; `'quiz'` → màn câu hỏi.
+2. Tạo `client/src/ui/screens/<ten>.ts` export `ScreenModule` (`mount` trả về hàm cleanup).
+3. Đăng ký trong `client/src/ui/screens/index.ts`; nếu cần mục menu: mảng `NAV` trong `ui/shell.ts`.
+4. CSS trong `styles/screens.css` hoặc `styles/games.css`. Bản đồ phía sau tự làm mờ ở mọi màn
+   trừ `home` (selector `body[data-scene="Map"]:not([data-screen="home"])`).
 
 ## Thêm / thay asset hình ảnh
 
-1. Đặt file vào `client/public/assets/images/<nhom>/` (xem quy ước trong [asset-pipeline.md](asset-pipeline.md)).
+1. Đặt file vào `client/public/assets/images/<nhom>/` (quy ước: [asset-pipeline.md](asset-pipeline.md)).
 2. Khai báo/sửa trong `client/src/config/assets.ts`:
    - SVG: `svg('key', 'assets/images/…/file.svg')`
    - PNG/WebP: `{ key: 'key', url: 'assets/images/…/file.png', type: 'image' }`
-3. Dùng trong scene bằng `ASSETS.xxx.key`, trong DOM bằng `ASSETS.xxx.url`.
-4. Nếu kích thước ảnh mới khác placeholder, chỉnh `setScale` ở chỗ dùng (MapScene: `ISLAND_SCALE`,
-   scale công trình 0.52; BossFightScene: robot 0.4, boss 0.78).
+3. Scene dùng `ASSETS.xxx.key`; DOM dùng `ASSETS.xxx.url` hoặc `assetUrlByKey(key)`.
 
 ## Thêm sự kiện giữa UI và scene
 
-1. Khai báo trong `GameEvents` (`client/src/core/events.ts`) kèm comment ý nghĩa.
-2. Phát: `bus.emit('ten:su-kien', payload)`; nghe: `const off = bus.on(...)`.
-3. Trong scene: gỡ listener ở `this.events.once(Phaser.Scenes.Events.SHUTDOWN, …)`.
-   Trong màn DOM: gỡ trong hàm cleanup của `mount`.
-4. Cập nhật bảng sự kiện trong [architecture.md](architecture.md).
+1. Khai báo trong `GameEvents` (`client/src/core/events.ts`) kèm comment.
+2. Phát `bus.emit(...)`, nghe `const off = bus.on(...)`; gỡ listener khi scene SHUTDOWN / khi màn cleanup.
+3. Cập nhật bảng sự kiện trong [architecture.md](architecture.md).
 
-## Thêm icon
+## Playtest nhanh (dev)
 
-Thêm path SVG 24×24 vào `STROKE` (nét) hoặc `FILLED` (tô đặc) trong `client/src/ui/icons.ts`,
-dùng `icon('ten', size)`.
-
-## Thêm animation nhân vật (giai đoạn sau)
-
-- Sprite sheet: đặt vào `public/assets/spritesheets/`, load bằng `this.load.spritesheet` trong
-  PreloaderScene, tạo anim bằng `this.anims.create`. Tham khảo skill `phaser4-gamedev:phaser-animation`.
-- Skeletal (Spine): dùng plugin Spine chính thức của Esoteric cho Phaser 4 (không dùng SpinePlugin cũ).
-  Asset `.json + .atlas + .png` đặt trong `public/assets/atlases/`.
+- `npm run dev`, mở http://localhost:5173.
+- Menu **Chơi game** → "Chơi thử" từng dạng (không lưu tiến độ).
+- Console: `__BUS__.emit('chapter:select', { chapterId: 'an-toan' })`, `__PHASER_GAME__`.
+- Đặt lại tiến độ: Trang chủ → Cài đặt → "Đặt lại tiến độ demo" (hoặc xóa localStorage `vnpt-heart:progress:v1`).

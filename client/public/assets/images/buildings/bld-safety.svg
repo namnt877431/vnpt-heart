@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d3e2f5"/></linearGradient>
+    <linearGradient id="hat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset="1" stop-color="#f0a818"/></linearGradient>
+    <linearGradient id="cone" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff9a4d"/><stop offset="1" stop-color="#e2561b"/></linearGradient>
+  </defs>
+  <ellipse cx="100" cy="190" rx="86" ry="8" fill="#1f5f1a" opacity=".35"/>
+  <!-- warehouse -->
+  <path d="M28 188 V96 L100 64 L172 96 V188 Z" fill="url(#w)" stroke="#1b4fa8" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M22 100 L100 64 L178 100" fill="none" stroke="#1446b8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="70" y="128" width="60" height="60" rx="4" fill="#2f7cf6" stroke="#0e3585" stroke-width="3"/>
+  <path d="M70 140 H130 M70 152 H130 M70 164 H130 M70 176 H130" stroke="#8cc4ff" stroke-width="3"/>
+  <!-- safety stripe -->
+  <rect x="28" y="112" width="144" height="10" fill="#ffd23f"/>
+  <path d="M36 112 l-8 10 M52 112 l-8 10 M68 112 l-8 10 M84 112 l-8 10 M100 112 l-8 10 M116 112 l-8 10 M132 112 l-8 10 M148 112 l-8 10 M164 112 l-8 10 M172 116 l-4 6" stroke="#1d1d1d" stroke-width="4"/>
+  <!-- hard hat on the roof -->
+  <path d="M60 58 a40 34 0 0 1 80 0 Z" fill="url(#hat)" stroke="#8a5a00" stroke-width="4"/>
+  <rect x="50" y="54" width="100" height="10" rx="5" fill="url(#hat)" stroke="#8a5a00" stroke-width="4"/>
+  <path d="M100 26 V56" stroke="#c98a00" stroke-width="5"/>
+  <!-- cones -->
+  <path d="M30 188 L40 150 L50 188 Z" fill="url(#cone)" stroke="#8a2a00" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="35" y="164" width="10" height="6" fill="#fff"/>
+  <path d="M150 188 L160 150 L170 188 Z" fill="url(#cone)" stroke="#8a2a00" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="155" y="164" width="10" height="6" fill="#fff"/>
+</svg>

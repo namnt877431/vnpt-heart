@@ -29,7 +29,7 @@ body::before {
   pointer-events: none;
 }
 
-body[data-screen="boss"] {
+body[data-scene="BossFight"] {
   background: linear-gradient(180deg, #62bdff 0%, #b9e5ff 60%, #e6f7ff 100%);
 }
 
@@ -81,8 +81,8 @@ button {
   display: block;
 }
 
-/* Map is dimmed behind full-panel screens */
-body:is([data-screen="play"], [data-screen="leaderboard"], [data-screen="badges"], [data-screen="group"]) #game-container {
+/* Map is dimmed behind every screen except home (the boss arena is never dimmed) */
+body[data-scene="Map"]:not([data-screen="home"]) #game-container {
   filter: blur(3px) brightness(0.85) saturate(0.9);
 }
 
