@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="rock" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a47a55"/>
+      <stop offset=".45" stop-color="#7a5638"/>
+      <stop offset="1" stop-color="#4c3322"/>
+    </linearGradient>
+    <radialGradient id="grass" cx=".45" cy=".35" r=".8">
+      <stop offset="0" stop-color="#9be35a"/>
+      <stop offset=".7" stop-color="#57b93a"/>
+      <stop offset="1" stop-color="#2f8a2a"/>
+    </radialGradient>
+  </defs>
+  <!-- floating rock -->
+  <path d="M16 104 C18 150 60 176 96 196 C120 240 160 290 196 296 C236 290 270 236 300 200 C344 178 384 150 384 104 Z" fill="url(#rock)" stroke="#3a2415" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M60 150 L92 168 M150 200 L168 236 M250 190 L230 232 M320 150 L296 170" stroke="#3a2415" stroke-width="4" stroke-linecap="round" opacity=".5"/>
+  <path d="M70 130 C90 150 130 162 160 166" stroke="#c9a078" stroke-width="6" fill="none" stroke-linecap="round" opacity=".5"/>
+  <!-- grass skirt drips -->
+  <path d="M16 104 Q30 132 48 118 Q62 138 80 124 Q100 146 120 130 Q142 150 166 134 Q190 152 212 134 Q236 150 258 132 Q280 146 300 126 Q322 138 338 120 Q360 132 384 104 Z" fill="#3e9e2f" stroke="#256b1f" stroke-width="4" stroke-linejoin="round"/>
+  <!-- top surface -->
+  <ellipse cx="200" cy="100" rx="186" ry="72" fill="url(#grass)" stroke="#256b1f" stroke-width="5"/>
+  <ellipse cx="160" cy="76" rx="96" ry="24" fill="#c6f38a" opacity=".45"/>
+  <!-- bushes -->
+  <g stroke="#1f5f1a" stroke-width="3">
+    <circle cx="56" cy="104" r="16" fill="#3fa336"/><circle cx="72" cy="96" r="14" fill="#4fbb3f"/>
+    <circle cx="336" cy="110" r="15" fill="#3fa336"/><circle cx="350" cy="100" r="12" fill="#4fbb3f"/>
+    <circle cx="112" cy="140" r="11" fill="#4fbb3f"/>
+    <circle cx="294" cy="140" r="11" fill="#4fbb3f"/>
+  </g>
+  <g fill="#ffe26b" stroke="#c98a00" stroke-width="1.5">
+    <circle cx="140" cy="128" r="4"/><circle cx="260" cy="130" r="4"/><circle cx="98" cy="84" r="3.5"/><circle cx="312" cy="86" r="3.5"/>
+  </g>
+</svg>

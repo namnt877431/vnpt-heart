@@ -1,0 +1,37 @@
+/**
+ * Asset manifest — the ONLY place asset keys and file paths are declared.
+ * PreloaderScene loads everything here; scenes and UI refer to assets by key.
+ *
+ * To swap placeholder art for final art (e.g. AI-generated PNG):
+ *   1. Drop the file into public/assets/images/<category>/
+ *   2. Change `url` (and `type` to 'image' for PNG/WebP). Keys stay the same.
+ */
+export type AssetType = 'svg' | 'image';
+
+export interface AssetDef {
+  key: string;
+  url: string;
+  type: AssetType;
+  /** SVGs are rasterised at this multiple of their viewBox size for crispness. */
+  svgScale?: number;
+}
+
+const svg = (key: string, url: string, svgScale = 2): AssetDef => ({ key, url, type: 'svg', svgScale });
+
+export const ASSETS = {
+  robot: svg('robot', 'assets/images/characters/robot.svg'),
+  boss: svg('boss', 'assets/images/characters/boss.svg'),
+  island: svg('island', 'assets/images/environment/island.svg'),
+  cloud: svg('cloud', 'assets/images/environment/cloud.svg'),
+  tree: svg('tree', 'assets/images/environment/tree.svg'),
+  bldHeart: svg('bld-heart', 'assets/images/buildings/bld-heart.svg'),
+  bldRule: svg('bld-rule', 'assets/images/buildings/bld-rule.svg'),
+  bld5g: svg('bld-5g', 'assets/images/buildings/bld-5g.svg'),
+  bldBoss: svg('bld-boss', 'assets/images/buildings/bld-boss.svg'),
+  bldMaster: svg('bld-master', 'assets/images/buildings/bld-master.svg'),
+} as const satisfies Record<string, AssetDef>;
+
+export type AssetKey = (typeof ASSETS)[keyof typeof ASSETS]['key'];
+
+/** Public URL for use in DOM <img> tags (same files Phaser loads). */
+export const assetUrl = (def: AssetDef): string => def.url;

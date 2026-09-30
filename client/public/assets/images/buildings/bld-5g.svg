@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <ellipse cx="100" cy="210" rx="70" ry="8" fill="#1f5f1a" opacity=".35"/>
+  <!-- lattice tower -->
+  <g stroke="#b3202f" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M60 208 L92 40 M140 208 L108 40"/>
+  </g>
+  <g stroke="#e8e8e8" stroke-width="3" fill="none">
+    <path d="M66 180 L134 180 M72 150 L128 150 M78 120 L122 120 M84 90 L116 90 M88 64 L112 64"/>
+    <path d="M66 180 L128 150 M134 180 L72 150 M72 150 L122 120 M128 150 L78 120 M78 120 L116 90 M122 120 L84 90"/>
+  </g>
+  <rect x="88" y="26" width="24" height="18" rx="3" fill="#e8283b" stroke="#7a0f18" stroke-width="3"/>
+  <line x1="100" y1="26" x2="100" y2="4" stroke="#7a0f18" stroke-width="4"/>
+  <circle cx="100" cy="4" r="4" fill="#ff5a6a"/>
+  <!-- signal arcs -->
+  <g stroke="#4ee6ff" stroke-width="5" fill="none" stroke-linecap="round">
+    <path d="M124 24 q10 12 0 24"/><path d="M136 16 q18 20 0 40"/>
+    <path d="M76 24 q-10 12 0 24"/><path d="M64 16 q-18 20 0 40"/>
+  </g>
+  <!-- dish -->
+  <path d="M148 150 q30 -6 34 26 z" fill="#f5f7fb" stroke="#4a5a74" stroke-width="3"/>
+  <line x1="160" y1="170" x2="160" y2="208" stroke="#4a5a74" stroke-width="4"/>
+  <!-- control hut -->
+  <rect x="18" y="170" width="44" height="38" rx="4" fill="#ffffff" stroke="#1b4fa8" stroke-width="3"/>
+  <rect x="26" y="180" width="28" height="12" rx="2" fill="#2f7cf6"/>
+</svg>

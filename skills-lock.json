@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "skills": {
+    "scenario": {
+      "source": "scenario-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/scenario/SKILL.md",
+      "computedHash": "9252c379ecd05e087e8173ac3efc8c2df357507a2ad8cc27f23f93385510df29"
+    },
+    "scenario-consistency": {
+      "source": "scenario-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/scenario-consistency/SKILL.md",
+      "computedHash": "e26e04d134d57aeff6f12147cc78b8b6b5953ea3e8db6fdd991a8ab25d1a15d6"
+    },
+    "scenario-game-assets": {
+      "source": "scenario-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/scenario-game-assets/SKILL.md",
+      "computedHash": "b6bc786c83380d65f52b50a9e1cf4f910239860f91856cacbcc5332871dc72ec"
+    },
+    "scenario-identity-library": {
+      "source": "scenario-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/scenario-identity-library/SKILL.md",
+      "computedHash": "72318fa7eb336c5559154d132daf912be385d5f9a66e28b99758a242ef95e661"
+    },
+    "scenario-image": {
+      "source": "scenario-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/scenario-image/SKILL.md",
+      "computedHash": "3e141d6b48626b01ce1e5b0dcec177e8b1c8327a1547ec169714f328ce0479d0"
+    },
+    "scenario-inspiration": {
+      "source": "scenario-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/scenario-inspiration/SKILL.md",
+      "computedHash": "26e7b54345ae170084102d485358acb05bbda482ece8e3e890bbbff6b75633d0"
+    },
+    "scenario-quality-gate": {
+      "source": "scenario-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/scenario-quality-gate/SKILL.md",
+      "computedHash": "c1818cb360ede7056d6328a4994c03cc43b7552ab1ad112cb85e78624d68a4af"
+    },
+    "scenario-sprite-animation": {
+      "source": "scenario-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/scenario-sprite-animation/SKILL.md",
+      "computedHash": "c9579f869f23c9ea8dcbaeac662d519a82462d7b9c4c46b4ac41499e01695493"
+    }
+  }
+}

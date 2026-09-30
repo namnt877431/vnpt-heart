@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 280" width="300" height="280">
+  <defs>
+    <radialGradient id="bodyG" cx=".4" cy=".35" r=".75">
+      <stop offset="0" stop-color="#8a5cf0"/>
+      <stop offset=".6" stop-color="#5a2fb8"/>
+      <stop offset="1" stop-color="#2f1370"/>
+    </radialGradient>
+    <linearGradient id="hornG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe08a"/>
+      <stop offset="1" stop-color="#e08a1e"/>
+    </linearGradient>
+    <linearGradient id="boltG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff59a"/>
+      <stop offset="1" stop-color="#ffb300"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="150" cy="268" rx="96" ry="10" fill="#1a0b3d" opacity=".3"/>
+  <!-- horns -->
+  <path d="M92 70 L70 12 L118 56 Z" fill="url(#hornG)" stroke="#7a3e00" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M208 70 L230 12 L182 56 Z" fill="url(#hornG)" stroke="#7a3e00" stroke-width="4" stroke-linejoin="round"/>
+  <!-- cloud body -->
+  <g fill="url(#bodyG)" stroke="#1d0a4d" stroke-width="6">
+    <path d="M60 200 C20 196 18 140 58 132 C48 86 100 58 132 80 C150 44 214 52 222 96 C266 92 286 140 256 168 C282 196 256 240 214 228 C196 262 110 264 96 232 C66 244 40 226 60 200 Z"/>
+  </g>
+  <path d="M84 110 C96 92 122 86 138 96" stroke="#b79bff" stroke-width="8" fill="none" stroke-linecap="round" opacity=".6"/>
+  <!-- brows -->
+  <path d="M86 118 L138 138" stroke="#12052f" stroke-width="12" stroke-linecap="round"/>
+  <path d="M214 118 L162 138" stroke="#12052f" stroke-width="12" stroke-linecap="round"/>
+  <!-- eyes -->
+  <ellipse cx="114" cy="156" rx="24" ry="20" fill="#ffffff" stroke="#12052f" stroke-width="4"/>
+  <ellipse cx="186" cy="156" rx="24" ry="20" fill="#ffffff" stroke="#12052f" stroke-width="4"/>
+  <circle cx="120" cy="160" r="10" fill="#ff2d4d"/>
+  <circle cx="180" cy="160" r="10" fill="#ff2d4d"/>
+  <circle cx="123" cy="157" r="3.5" fill="#fff"/>
+  <circle cx="183" cy="157" r="3.5" fill="#fff"/>
+  <!-- mouth -->
+  <path d="M104 204 Q150 180 196 204 Q150 230 104 204 Z" fill="#1a0636" stroke="#12052f" stroke-width="4"/>
+  <path d="M116 200 l8 12 l8 -14 l8 13 l9 -14 l9 14 l8 -13 l8 14 l8 -12" fill="#ffffff" stroke="#12052f" stroke-width="2" stroke-linejoin="round"/>
+  <!-- bolts -->
+  <path d="M34 150 L58 118 L52 142 L70 140 L42 178 L50 154 Z" fill="url(#boltG)" stroke="#8a4b00" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M262 96 L284 70 L278 92 L294 90 L270 124 L276 102 Z" fill="url(#boltG)" stroke="#8a4b00" stroke-width="3" stroke-linejoin="round"/>
+</svg>

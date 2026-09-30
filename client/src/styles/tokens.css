@@ -1,0 +1,42 @@
+/*
+ * Design tokens. Keep in sync with src/config/theme.ts (Phaser side).
+ * Look & feel: Gunny-style casual game UI — thick navy outlines, white inner
+ * borders, glossy 3D buttons, chunky outlined display type.
+ */
+:root {
+  --navy-900: #0a2266;
+  --navy-700: #0e3a8c;
+  --blue-600: #1b5fd6;
+  --blue-500: #2f7cf6;
+  --blue-400: #5a9dff;
+  --blue-200: #bfdcfb;
+  --blue-100: #e3f1ff;
+  --blue-50: #f3f9ff;
+  --cyan: #4ee6ff;
+
+  --gold-300: #ffe38a;
+  --gold-500: #ffc629;
+  --gold-600: #ffab1a;
+  --gold-700: #e08a00;
+  --gold-900: #9a5200;
+
+  --red-500: #e8283b;
+  --red-700: #a8101f;
+  --green-500: #36c05a;
+  --purple-500: #7a4ce0;
+  --purple-700: #4b23a8;
+
+  --ink: #0d2350;
+  --ink-soft: #4a5f8a;
+
+  --font-display: "Baloo 2", "Be Vietnam Pro", system-ui, sans-serif;
+  --font-body: "Be Vietnam Pro", system-ui, sans-serif;
+
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --topbar-h: 76px;
+
+  --panel-bg: linear-gradient(180deg, #ffffff 0%, #eaf4ff 100%);
+  --panel-ring: 0 0 0 3px var(--navy-700), 0 10px 24px rgba(10, 34, 102, 0.35);
+  --sky: linear-gradient(180deg, #4fb8ff 0%, #93d6ff 45%, #d9f3ff 100%);
+}

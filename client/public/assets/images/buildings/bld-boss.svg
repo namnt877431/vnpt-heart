@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="dark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3f6e"/><stop offset="1" stop-color="#141733"/></linearGradient>
+    <linearGradient id="shield" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a9bff"/><stop offset="1" stop-color="#1238a0"/></linearGradient>
+  </defs>
+  <ellipse cx="100" cy="190" rx="86" ry="8" fill="#1f5f1a" opacity=".35"/>
+  <rect x="22" y="96" width="36" height="92" fill="url(#dark)" stroke="#0a0c20" stroke-width="4"/>
+  <rect x="142" y="96" width="36" height="92" fill="url(#dark)" stroke="#0a0c20" stroke-width="4"/>
+  <path d="M22 96 v-12 h8 v8 h6 v-8 h8 v8 h6 v-8 h8 v12 Z M142 96 v-12 h8 v8 h6 v-8 h8 v8 h6 v-8 h8 v12 Z" fill="#2a2e56" stroke="#0a0c20" stroke-width="3"/>
+  <rect x="52" y="70" width="96" height="118" rx="4" fill="url(#dark)" stroke="#0a0c20" stroke-width="4"/>
+  <g fill="#ff9a2e">
+    <rect x="30" y="112" width="8" height="12" rx="2"/><rect x="42" y="112" width="8" height="12" rx="2"/>
+    <rect x="150" y="112" width="8" height="12" rx="2"/><rect x="162" y="112" width="8" height="12" rx="2"/>
+    <rect x="30" y="140" width="8" height="12" rx="2"/><rect x="162" y="140" width="8" height="12" rx="2"/>
+  </g>
+  <path d="M84 188 v-26 q16 -16 32 0 v26 Z" fill="#0a0c20"/>
+  <!-- shield emblem -->
+  <path d="M100 14 L148 30 V66 C148 96 124 112 100 122 C76 112 52 96 52 66 V30 Z" fill="url(#shield)" stroke="#ffffff" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M106 36 L84 72 H100 L92 100 L118 60 H102 Z" fill="#ffd23f" stroke="#8a5a00" stroke-width="3" stroke-linejoin="round"/>
+</svg>
