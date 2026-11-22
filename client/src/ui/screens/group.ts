@@ -1,4 +1,8 @@
-import { me, myGroup } from '../../data/mock';
+import type { MyGroupResponse } from '../../../../shared/api-types';
+import { API_MODE } from '../../data/api';
+import { me } from '../../data/player';
+import { fetchMyGroup } from '../../data/selectors';
+import { fillAsync } from '../components/async';
 import { comingSoon } from '../components/overlay';
 import { progressBar } from '../components/progress';
 import { playerRankList } from '../components/rank-list';
@@ -6,22 +10,13 @@ import { $, esc, fmt, onAction } from '../dom';
 import { icon } from '../icons';
 import type { ScreenModule } from './types';
 
-const CHALLENGES = [
+// TODO(content): group challenges are demo-only until BTC defines them (hidden in API mode).
+const CHALLENGES = API_MODE ? [] : [
   { title: 'Cả nhóm vượt Chặng 1', reward: 200, progress: 18, target: 24, icon: 'flag' },
   { title: 'Tổng 5.000 sao trong tuần', reward: 150, progress: 3420, target: 5000, icon: 'star' },
 ];
 
-/** The player's group: stats, weekly goal, member ranking and group challenges. */
-export const groupScreen: ScreenModule = {
-  id: 'group',
-  scene: 'Map',
-  mount(root, { go }) {
-    const g = myGroup;
-
-    root.innerHTML = `
-      <div class="screen screen--center">
-        <section class="panel group">
-          <header class="panel__ribbon">${icon('users', 26)} NHÓM CỦA TÔI</header>
+const groupBody = (g: NonNullable<MyGroupResponse['group']>): string => `
           <div class="group__grid">
             <div class="group__card">
               <div class="group__emblem">${icon('users', 44)}</div>
@@ -48,7 +43,7 @@ export const groupScreen: ScreenModule = {
             </div>
 
             <div class="group__challenges">
-              <h3>Thử thách nhóm</h3>
+              ${CHALLENGES.length ? '<h3>Thử thách nhóm</h3>' : ''}
               ${CHALLENGES.map((c) => `
                 <button class="challenge" data-action="challenge">
                   <span class="challenge__icon">${icon(c.icon, 26)}</span>
@@ -69,11 +64,26 @@ export const groupScreen: ScreenModule = {
                 <small>Cả nhóm cùng tham gia mới lên hạng, không chỉ vài cá nhân xuất sắc.</small>
               </div>
             </div>
-          </div>
+          </div>`;
+
+/** The player's group: stats, weekly goal, member ranking and group challenges. */
+export const groupScreen: ScreenModule = {
+  id: 'group',
+  scene: 'Map',
+  mount(root, { go }) {
+
+    root.innerHTML = `
+      <div class="screen screen--center">
+        <section class="panel group">
+          <header class="panel__ribbon">${icon('users', 26)} NHÓM CỦA TÔI</header>
+          <div data-group></div>
           <button class="btn btn--ghost btn--sm board__back" data-action="back">${icon('chevronLeft', 16)} Bản đồ</button>
         </section>
       </div>
     `;
+
+    fillAsync($(root, '[data-group]'), fetchMyGroup(), (g) =>
+      g ? groupBody(g) : '<p class="async-note">Bạn chưa thuộc nhóm thi đua nào. Liên hệ Ban tổ chức để được xếp nhóm.</p>');
 
     return onAction($(root, '.screen'), {
       back: () => go('home'),

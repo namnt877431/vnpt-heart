@@ -67,7 +67,7 @@ export const shareScreen: ScreenModule = {
     const screen = $(root, '.screen');
     const form = $<HTMLFormElement>(screen, '[data-form]');
 
-    const onSubmit = (e: SubmitEvent) => {
+    const onSubmit = async (e: SubmitEvent) => {
       e.preventDefault();
       const fd = new FormData(form);
       const missing = FIELDS.filter((f) => f.required && !String(fd.get(f.name) ?? '').trim());
@@ -80,7 +80,10 @@ export const shareScreen: ScreenModule = {
         setRobot(screen, 'Bạn cần đồng ý để Ban tổ chức biên tập tình huống nhé.', 'think');
         return;
       }
-      addStory({
+      const submit = form.querySelector<HTMLButtonElement>('[type="submit"]')!;
+      submit.disabled = true;
+      try {
+        await addStory({
         at: new Date().toISOString(),
         unit: String(fd.get('unit')),
         situation: String(fd.get('situation')),
@@ -90,7 +93,13 @@ export const shareScreen: ScreenModule = {
         outcome: String(fd.get('outcome') ?? ''),
         lesson: String(fd.get('lesson')),
         anonymous: !!fd.get('anonymous'),
-      });
+        });
+      } catch (err) {
+        setRobot(screen, `Chưa gửi được: ${(err as Error).message}. Bạn thử lại sau nhé.`, 'sad');
+        return;
+      } finally {
+        submit.disabled = false;
+      }
       form.reset();
       $(screen, '[data-count]').textContent = String(stories().length);
       screen.querySelector('.pipeline li')?.classList.add('is-active');

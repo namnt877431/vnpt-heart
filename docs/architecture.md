@@ -1,5 +1,7 @@
 # Kiến trúc client
 
+> Server, CSDL, API, trang quản trị và hai chế độ chạy (demo / api): xem [backend.md](backend.md).
+
 ## Hai lớp chồng lên nhau
 
 ```
@@ -21,12 +23,12 @@
 ## Các tầng mã nguồn
 
 ```
-data/content/*   nội dung (chặng, level, câu hỏi)      ← BTC/biên tập sửa ở đây
-data/game-types  kiểu spec của 10 dạng mini-game
-data/mock        dữ liệu giả (người chơi, BXH, nhóm)   ← thay bằng API
-data/selectors   giá trị sống: điểm/cấp của tôi, BXH đã trộn điểm của tôi
-core/progress    tiến độ (sao, điểm, mở khóa) – demo: localStorage
-core/scoring     luật sao & điểm
+../shared/*      kiểu spec, luật sao/điểm, mở khóa, mystery, kiểu API — dùng chung với server
+data/content/*   nội dung mẫu (demo + seed); chế độ api: nạp từ server lúc khởi động (setChapters)
+data/api         fetch /api, API_MODE; data/player: người đang đăng nhập (`me`)
+data/mock        dữ liệu giả cho bản demo
+data/selectors   playerStats + fetch* (BXH, nhóm, vinh danh, huy hiệu): demo → mock, api → server
+core/progress    tiến độ đọc đồng bộ – demo: localStorage; api: nạp từ server, kết quả gửi POST /plays
 core/events      event bus UI ↔ Phaser
 ui/games/*       10 module mini-game (DOM) + registry
 ui/screens/*     màn hình (home, chapter, level, games, leaderboard, badges, group, share)
@@ -86,6 +88,6 @@ Dev build: `window.__BUS__`, `window.__PHASER_GAME__` để playtest.
 
 - Phaser nhận cả `pointerup` khi thả chuột trên DOM đè lên canvas: handler click trong scene phải
   kiểm tra `pointer.event?.target === this.game.canvas` (xem `MapScene.createIsland`).
-- **Bảo mật đáp án:** demo gửi đáp án xuống trình duyệt. Khi có backend, server giữ `correct`/`answer`
-  và chấm điểm; client chỉ gửi lựa chọn.
+- **Bảo mật đáp án:** đáp án vẫn được gửi xuống trình duyệt. Server đã tự tính sao/điểm, kiểm tra mở khóa,
+  số câu và thời gian tối thiểu; bước tiếp theo là gỡ đáp án khỏi `GET /content` và chấm từng câu ở server.
 - Tiến độ demo lưu `localStorage` key `vnpt-heart:progress:v1` (chỉ trên máy đó).

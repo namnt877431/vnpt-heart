@@ -1,7 +1,9 @@
 import { ASSETS } from '../../config/assets';
-import { currentChapter, nextLevelIndex, resetProgress } from '../../core/progress';
-import { me, monthlyGroups, todayMission } from '../../data/mock';
-import { leaderboard, playerStats } from '../../data/selectors';
+import { currentChapter, dailyMission, nextLevelIndex, resetProgress } from '../../core/progress';
+import { API_MODE } from '../../data/api';
+import { me } from '../../data/player';
+import { fetchGroups, fetchLeaderboard, playerStats } from '../../data/selectors';
+import { fillAsync } from '../components/async';
 import { avatar } from '../components/avatar';
 import { comingSoon, openModal, toast } from '../components/overlay';
 import { progressBar } from '../components/progress';
@@ -26,6 +28,7 @@ export const homeScreen: ScreenModule = {
     const stats = playerStats();
     const chapter = currentChapter();
     const nextLevel = chapter.levels[nextLevelIndex(chapter)];
+    const todayMission = dailyMission();
 
     root.innerHTML = `
       <div class="home">
@@ -70,8 +73,8 @@ export const homeScreen: ScreenModule = {
               <button class="seg__btn is-active" data-action="lb-tab" data-tab="players">Cá nhân</button>
               <button class="seg__btn" data-action="lb-tab" data-tab="groups">Nhóm</button>
             </div>
-            <div class="lb-card__list" data-list="players">${playerRankList(leaderboard('week').slice(0, 5), me.id)}</div>
-            <div class="lb-card__list" data-list="groups" hidden>${groupRankList(monthlyGroups, me.groupId)}</div>
+            <div class="lb-card__list" data-list="players" data-fill="week"></div>
+            <div class="lb-card__list" data-list="groups" data-fill="groups" hidden></div>
           </section>
           <section class="panel lb-card">
             <header class="lb-card__head">
@@ -79,7 +82,7 @@ export const homeScreen: ScreenModule = {
               <button class="link" data-action="group">Xem tất cả ${icon('chevronRight', 14)}</button>
             </header>
             <div class="lb-card__cols"><span>Nhóm</span><span>Điểm TB</span></div>
-            ${groupRankList(monthlyGroups, me.groupId)}
+            <div data-fill="groups"></div>
           </section>
         </aside>
 
@@ -112,6 +115,12 @@ export const homeScreen: ScreenModule = {
 
     const home = $(root, '.home');
     const stopSafe = watchSafeArea($(home, '.home__map'));
+    const week = fetchLeaderboard('week');
+    const groups = fetchGroups();
+    $$(home, '[data-fill="week"]').forEach((el) =>
+      fillAsync(el, week, (d) => (d.entries.length ? playerRankList(d.entries.slice(0, 5), me.id) : '<p class="async-note">Chưa có điểm tuần này.</p>')),
+    );
+    $$(home, '[data-fill="groups"]').forEach((el) => fillAsync(el, groups, (g) => groupRankList(g.slice(0, 5), me.groupId)));
     const stopActions = onAction(home, {
       start: () => go('level', { levelId: nextLevel.id }),
       leaderboard: () => go('leaderboard'),
@@ -120,7 +129,7 @@ export const homeScreen: ScreenModule = {
       profile: () => comingSoon('Hồ sơ chi tiết'),
       mission: () => comingSoon('Chi tiết nhiệm vụ'),
       share: () => go('share'),
-      settings: () => openModal(SETTINGS_HTML, {
+      settings: () => openModal(API_MODE ? SETTINGS_API_HTML : SETTINGS_HTML, {
         title: 'CÀI ĐẶT',
         onMount: (el, close) => el.querySelector('[data-reset]')?.addEventListener('click', () => {
           resetProgress();
@@ -153,6 +162,12 @@ const GUIDE_HTML = `
     <li>${icon('target', 22)}<span><b>Boss Challenge</b> cuối mỗi chặng: trả lời đúng để giành lượt bắn, chỉnh góc và lực để hạ Boss.</span></li>
     <li>${icon('users', 22)}<span><b>Thi đua:</b> BXH tuần, tháng, toàn mùa; điểm nhóm tính theo điểm trung bình, tỷ lệ tham gia và thành tích trong kỳ.</span></li>
   </ol>`;
+
+const SETTINGS_API_HTML = `
+  <div class="settings">
+    <p>${icon('gear', 18)} Âm thanh, nhạc nền: sẽ có ở phiên bản sau.</p>
+    <p>${icon('shield', 18)} Tiến độ của bạn được lưu trên máy chủ, chơi trên máy nào cũng tiếp tục được.</p>
+  </div>`;
 
 const SETTINGS_HTML = `
   <div class="settings">

@@ -23,6 +23,10 @@ export interface GameEvents {
   'chapter:select': { chapterId: string };
   /** Progress store changed (level finished, reset, …). */
   'progress:changed': void;
+  /** A result could not be saved on the server (API mode). */
+  'progress:error': { message: string };
+  /** API mode: connection state and results waiting to be re-sent. */
+  'net:status': { online: boolean; pending: number };
   /**
    * The current screen's free area (element with [data-safe-area]) that the
    * active scene should fit its world into; null = whole viewport.

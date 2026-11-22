@@ -1,6 +1,7 @@
-import { me, monthlyGroups } from '../../data/mock';
-import { honorList, leaderboard } from '../../data/selectors';
-import type { RankEntry, RankPeriod } from '../../data/types';
+import { me } from '../../data/player';
+import { fetchGroups, fetchHonors, fetchLeaderboard } from '../../data/selectors';
+import type { GroupRank, Honor, RankEntry, RankPeriod } from '../../data/types';
+import { fillAsync } from '../components/async';
 import { avatar } from '../components/avatar';
 import { groupRankList, playerRankList } from '../components/rank-list';
 import { $, $$, esc, fmt, onAction } from '../dom';
@@ -28,9 +29,8 @@ const podium = (top: RankEntry[]): string => {
     .join('')}</div>`;
 };
 
-const playersPanel = (period: RankPeriod): string => {
-  const list = leaderboard(period);
-  const mine = list.find((p) => p.playerId === me.id);
+const playersPanel = (period: RankPeriod, list: RankEntry[], mine: RankEntry | null): string => {
+  if (!list.length) return `<p class="board__q">${esc(PERIODS.find((p) => p.id === period)!.question)}</p><p class="async-note">Chưa có ai ghi điểm trong kỳ này. Hãy là người đầu tiên!</p>`;
   return `
     <p class="board__q">${esc(PERIODS.find((p) => p.id === period)!.question)}</p>
     ${podium(list.slice(0, 3))}
@@ -42,6 +42,29 @@ const playersPanel = (period: RankPeriod): string => {
       <span class="rank-row__score">${icon('star', 16, 'c-gold')}${fmt(mine.score)}</span>
     </footer>` : ''}`;
 };
+
+const groupsPanel = (groups: GroupRank[]): string =>
+  groups.length
+    ? `${groupRankList(groups, me.groupId, { showMembers: true })}
+      <div class="group-metrics">
+        <div class="group-metrics__head"><span>Nhóm</span><span>Điểm TB</span><span>Tham gia</span><span>Thành tích kỳ</span></div>
+        ${groups.map((g) => `<div class="${g.groupId === me.groupId ? 'is-me' : ''}"><span>${esc(g.name)}</span><span>${fmt(g.avgScore)}</span><span>${g.participation}%</span><span>+${fmt(g.periodBonus)}</span></div>`).join('')}
+      </div>`
+    : '<p class="async-note">Chưa có nhóm nào.</p>';
+
+const honorsPanel = (honors: Honor[]): string =>
+  honors.length
+    ? `<div class="honors">
+        ${honors.map((h) => `
+          <article class="honor ${h.playerId === me.id ? 'is-me' : ''}">
+            <span class="honor__icon">${icon(h.icon, 28)}</span>
+            <small>${esc(h.title)}</small>
+            ${avatar(h.name, 52)}
+            <strong>${esc(h.name)}</strong>
+            <span>${esc(h.value)}</span>
+          </article>`).join('')}
+      </div>`
+    : '<p class="async-note">Tuần này chưa có dữ liệu vinh danh.</p>';
 
 /** Personal (week / month / season) and group leaderboards, plus honours. */
 export const leaderboardScreen: ScreenModule = {
@@ -63,27 +86,14 @@ export const leaderboardScreen: ScreenModule = {
             </div>
           </div>
 
-          <div data-kind-panel="players">${playersPanel(period)}</div>
+          <div data-kind-panel="players"></div>
           <div data-kind-panel="groups" hidden>
             <p class="board__q">Điểm nhóm = <b>điểm trung bình thành viên</b> + <b>tỷ lệ tham gia</b> + <b>thành tích trong kỳ</b>, để cả nhóm cùng tham gia chứ không chỉ vài người giỏi.</p>
-            ${groupRankList(monthlyGroups, me.groupId, { showMembers: true })}
-            <div class="group-metrics">
-              <div class="group-metrics__head"><span>Nhóm</span><span>Điểm TB</span><span>Tham gia</span><span>Thành tích kỳ</span></div>
-              ${monthlyGroups.map((g) => `<div class="${g.groupId === me.groupId ? 'is-me' : ''}"><span>${esc(g.name)}</span><span>${fmt(g.avgScore)}</span><span>${g.participation}%</span><span>+${fmt(g.periodBonus)}</span></div>`).join('')}
-            </div>
+            <div data-groups></div>
           </div>
           <div data-kind-panel="honors" hidden>
             <p class="board__q">Ngoài điểm số, BXH còn ghi nhận những người chơi nổi bật trong kỳ.</p>
-            <div class="honors">
-              ${honorList().map((h) => `
-                <article class="honor ${h.playerId === me.id ? 'is-me' : ''}">
-                  <span class="honor__icon">${icon(h.icon, 28)}</span>
-                  <small>${esc(h.title)}</small>
-                  ${avatar(h.name, 52)}
-                  <strong>${esc(h.name)}</strong>
-                  <span>${esc(h.value)}</span>
-                </article>`).join('')}
-            </div>
+            <div data-honors></div>
           </div>
           <button class="btn btn--ghost btn--sm board__back" data-action="back">${icon('chevronLeft', 16)} Bản đồ</button>
         </section>
@@ -91,12 +101,18 @@ export const leaderboardScreen: ScreenModule = {
     `;
 
     const screen = $(root, '.screen');
+    const loadPlayers = () =>
+      fillAsync($(screen, '[data-kind-panel="players"]'), fetchLeaderboard(period), (d) => playersPanel(period, d.entries, d.me));
+    loadPlayers();
+    fillAsync($(screen, '[data-groups]'), fetchGroups(), groupsPanel);
+    fillAsync($(screen, '[data-honors]'), fetchHonors(), honorsPanel);
+
     return onAction(screen, {
       back: () => go('home'),
       period: (el) => {
         period = el.dataset.period as RankPeriod;
         $$(el.parentElement!, '.seg__btn').forEach((b) => b.classList.toggle('is-active', b === el));
-        $(screen, '[data-kind-panel="players"]').innerHTML = playersPanel(period);
+        loadPlayers();
       },
       kind: (el) => {
         $$(el.parentElement!, '.seg__btn').forEach((b) => b.classList.toggle('is-active', b === el));

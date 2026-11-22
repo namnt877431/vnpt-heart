@@ -1,8 +1,9 @@
 import { bus } from '../core/events';
 import type { ScreenId } from '../core/screens';
-import { me } from '../data/mock';
+import { me, myRole } from '../data/player';
 import { avatar } from './components/avatar';
-import { toast } from './components/overlay';
+import { API_MODE, apiPost } from '../data/api';
+import { openModal, toast } from './components/overlay';
 import { $$, esc, onAction } from './dom';
 import { icon } from './icons';
 import type { Router } from './router';
@@ -50,9 +51,30 @@ export const mountShell = (ui: HTMLElement): HTMLElement => {
     <main id="screen-root" class="screen-root"></main>
     <div id="modal-root"></div>
     <div id="toast-root" class="toast-root"></div>
+    <div class="net-pill" data-net hidden></div>
   `;
   return ui.querySelector<HTMLElement>('#screen-root')!;
 };
+
+/** API mode: account box with logout (and the admin page for BTC/admins). */
+const openAccountMenu = () =>
+  openModal(
+    `<div class="account">
+      <p><strong>${esc(me.name)}</strong><br/><small>${esc(me.role)}</small></p>
+      <div class="account__actions">
+        ${myRole !== 'player' ? `<a class="btn btn--blue btn--sm" href="admin.html" target="_blank" rel="noopener">${icon('gear', 16)} Trang quản trị</a>` : ''}
+        <button class="btn btn--ghost btn--sm" data-logout>${icon('logout', 16)} Đăng xuất</button>
+      </div>
+    </div>`,
+    {
+      title: 'TÀI KHOẢN',
+      onMount: (el) =>
+        el.querySelector('[data-logout]')?.addEventListener('click', async () => {
+          await apiPost('/auth/logout').catch(() => undefined);
+          location.reload();
+        }),
+    },
+  );
 
 /** Wire nav clicks and keep the active tab highlighted. */
 export const bindShell = (ui: HTMLElement, router: Router): void => {
@@ -63,7 +85,23 @@ export const bindShell = (ui: HTMLElement, router: Router): void => {
       router.go(el.dataset.screen as ScreenId);
     },
     bell: () => toast('Bạn có 3 thông báo mới', 'bell'),
-    user: () => toast('Hồ sơ cá nhân: sẽ có ở phiên bản sau', 'users'),
+    user: () => (API_MODE ? openAccountMenu() : toast('Hồ sơ cá nhân: sẽ có ở phiên bản sau', 'users')),
+  });
+
+  // results the server refused / could not save (API mode)
+  bus.on('progress:error', ({ message }) => toast(message, 'x'));
+
+  // connection pill: offline / results waiting to be re-sent
+  const pill = ui.querySelector<HTMLElement>('[data-net]')!;
+  let lastPending = 0;
+  bus.on('net:status', ({ online, pending }) => {
+    pill.hidden = online && pending === 0;
+    pill.classList.toggle('is-offline', !online);
+    pill.innerHTML = online
+      ? `${icon('arrowUp', 16)} Đang gửi lại ${pending} kết quả…`
+      : `${icon('wind', 16)} Mất kết nối${pending ? ` · ${pending} kết quả sẽ tự gửi khi có mạng` : ''}`;
+    if (online && pending === 0 && lastPending > 0) toast('Đã gửi xong các kết quả chờ', 'check');
+    lastPending = pending;
   });
 
   // chapter/level screens belong to the "Trang chủ" journey; highlight it there

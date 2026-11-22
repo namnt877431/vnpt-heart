@@ -1,4 +1,4 @@
-import { CHAPTERS, findLevel, SAMPLE_BY_TYPE } from '../../data/content';
+import { CHAPTERS, findLevel, sampleLevelId } from '../../data/content';
 import { GAME_TYPE_INFO, type GameType } from '../../data/game-types';
 import { $, esc, onAction } from '../dom';
 import { icon } from '../icons';
@@ -12,8 +12,9 @@ export const gamesScreen: ScreenModule = {
   id: 'games',
   scene: 'Map',
   mount(root, { go }) {
-    const types = Object.keys(GAME_TYPE_INFO) as GameType[];
-    const chapterOf = (t: GameType) => findLevel(SAMPLE_BY_TYPE[t])?.chapter;
+    // only types that have a playable level in the current content
+    const types = (Object.keys(GAME_TYPE_INFO) as GameType[]).filter((t) => sampleLevelId(t));
+    const chapterOf = (t: GameType) => findLevel(sampleLevelId(t))?.chapter;
 
     root.innerHTML = `
       <div class="screen screen--center">

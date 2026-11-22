@@ -1,7 +1,7 @@
 import { bus } from '../../core/events';
 import type { GameNote } from '../../core/scoring';
 import type { BossSpec } from '../../data/game-types';
-import { me } from '../../data/mock';
+import { me } from '../../data/player';
 import { avatar } from '../components/avatar';
 import { toast } from '../components/overlay';
 import { progressBar } from '../components/progress';

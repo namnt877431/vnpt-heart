@@ -1,6 +1,6 @@
 import { chapterStars, hasDoubleXp, isLevelUnlocked, recordResult } from '../../core/progress';
 import { pointsFor, starsFor, type GameResult } from '../../core/scoring';
-import { CHAPTERS, findLevel, SAMPLE_BY_TYPE, type Chapter } from '../../data/content';
+import { CHAPTERS, findLevel, sampleLevelId, type Chapter } from '../../data/content';
 import { GAME_TYPE_INFO, type GameSpec } from '../../data/game-types';
 import { openModal } from '../components/overlay';
 import { robotGuide, setRobot } from '../components/robot';
@@ -27,7 +27,7 @@ const resolve = (p: ScreenParams): Resolved => {
   if (p.spec) return { ...base, spec: p.spec, mystery: false };
   if (found) return { ...base, spec: found.level.spec, mystery: found.level.kind === 'mystery' };
   if (p.sample === 'mystery') return { mystery: true };
-  if (p.sample) return { spec: findLevel(SAMPLE_BY_TYPE[p.sample])?.level.spec, mystery: false };
+  if (p.sample) return { spec: findLevel(sampleLevelId(p.sample))?.level.spec, mystery: false };
   return { mystery: false };
 };
 
@@ -103,7 +103,7 @@ export const levelScreen: ScreenModule = {
       const result: GameResult = { ...partial, timeMs: performance.now() - started };
       const stars = starsFor(result, r.spec.parTimeSec);
       const points = pointsFor(result, stars, r.spec.parTimeSec, doubleXp);
-      const saved = r.levelId ? recordResult(r.levelId, stars, points) : null;
+      const saved = r.levelId ? recordResult(r.levelId, result, stars, points) : null;
       robot(ROBOT_LINES[stars], stars >= 2 ? 'happy' : stars === 0 ? 'sad' : 'idle');
       closeResult = showResult(result, stars, points, saved?.gained ?? null);
     };

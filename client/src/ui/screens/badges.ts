@@ -1,35 +1,38 @@
-import { badges } from '../../data/mock';
+import { fetchBadges } from '../../data/selectors';
+import type { Badge } from '../../data/types';
+import { fillAsync } from '../components/async';
 import { progressBar } from '../components/progress';
 import { $, esc, onAction } from '../dom';
 import { icon } from '../icons';
 import type { ScreenModule } from './types';
+
+const grid = (badges: Badge[]): string => `
+  <p class="badges__summary">Đã đạt <b>${badges.filter((b) => b.earned).length}</b> / ${badges.length} huy hiệu</p>
+  <div class="badge-grid">
+    ${badges.map((b) => `
+      <article class="badge ${b.earned ? 'is-earned' : 'is-locked'}" title="${esc(b.description)}">
+        <div class="badge__medal">${icon(b.icon, 40)}${b.earned ? '' : `<span class="badge__lock">${icon('lock', 14)}</span>`}</div>
+        <strong>${esc(b.name)}</strong>
+        <small>${esc(b.description)}</small>
+        ${b.earned ? '<span class="badge__done">Đã đạt</span>' : progressBar(b.progress * 100, 100, 'gold')}
+      </article>`).join('')}
+  </div>`;
 
 /** Badge collection grid: earned badges glow gold, others show progress. */
 export const badgesScreen: ScreenModule = {
   id: 'badges',
   scene: 'Map',
   mount(root, { go }) {
-    const earned = badges.filter((b) => b.earned).length;
-
     root.innerHTML = `
       <div class="screen screen--center">
         <section class="panel badges">
           <header class="panel__ribbon">${icon('medal', 26)} HUY HIỆU</header>
-          <p class="badges__summary">Đã đạt <b>${earned}</b> / ${badges.length} huy hiệu</p>
-          <div class="badge-grid">
-            ${badges.map((b) => `
-              <article class="badge ${b.earned ? 'is-earned' : 'is-locked'}" title="${esc(b.description)}">
-                <div class="badge__medal">${icon(b.icon, 40)}${b.earned ? '' : `<span class="badge__lock">${icon('lock', 14)}</span>`}</div>
-                <strong>${esc(b.name)}</strong>
-                <small>${esc(b.description)}</small>
-                ${b.earned ? '<span class="badge__done">Đã đạt</span>' : progressBar(b.progress * 100, 100, 'gold')}
-              </article>`).join('')}
-          </div>
+          <div data-badges></div>
           <button class="btn btn--ghost btn--sm board__back" data-action="back">${icon('chevronLeft', 16)} Bản đồ</button>
         </section>
       </div>
     `;
-
+    fillAsync($(root, '[data-badges]'), fetchBadges(), grid);
     return onAction($(root, '.screen'), { back: () => go('home') });
   },
 };

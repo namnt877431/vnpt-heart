@@ -1,0 +1,10 @@
+/* Self-hosted fonts (OFL), bundled by Vite: no dependency on Google Fonts,
+   which may be blocked on the company network. Each file covers latin +
+   vietnamese subsets via unicode-range, so browsers fetch only what they use. */
+@import '@fontsource/baloo-2/600.css';
+@import '@fontsource/baloo-2/700.css';
+@import '@fontsource/baloo-2/800.css';
+@import '@fontsource/be-vietnam-pro/400.css';
+@import '@fontsource/be-vietnam-pro/500.css';
+@import '@fontsource/be-vietnam-pro/600.css';
+@import '@fontsource/be-vietnam-pro/700.css';

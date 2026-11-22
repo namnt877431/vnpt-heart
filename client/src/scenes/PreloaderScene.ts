@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { ASSETS } from '../config/assets';
 import { COLORS, outlinedText } from '../config/theme';
+import { reportFailedFile } from '../core/error-report';
 import { bus } from '../core/events';
 
 /** Loads every asset in the manifest, generates small procedural textures, then signals the UI. */
@@ -22,6 +23,9 @@ export class PreloaderScene extends Phaser.Scene {
     this.load.on('progress', (p: number) => {
       bar.clear().fillStyle(COLORS.gold, 1).fillRoundedRect(x, y, Math.max(18, barW * p), 18, 9);
     });
+
+    // a game image that fails to load goes to the error log (missing file vs network)
+    this.load.on('loaderror', (file: Phaser.Loader.File) => reportFailedFile(typeof file.src === 'string' ? file.src : ''));
 
     for (const def of Object.values(ASSETS)) {
       if (def.type === 'svg') this.load.svg(def.key, def.url, { scale: def.svgScale ?? 1 });

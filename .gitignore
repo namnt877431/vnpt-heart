@@ -5,3 +5,5 @@ dist/
 .claude/settings.local.json
 # internal BTC documents (repo is public)
 docs/*.docx
+deploy/.env
+deploy/backups/

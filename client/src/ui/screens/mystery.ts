@@ -1,49 +1,12 @@
-import { addBonusPoints, recordResult, setDoubleXp } from '../../core/progress';
+import { MYSTERY_GIFT_POINTS, rollMystery, type MysteryOutcome } from '../../../../shared/mystery';
+import { addBonusPoints, openMysteryOnServer, recordResult, setDoubleXp } from '../../core/progress';
+import { API_MODE } from '../../data/api';
 import { CHAPTERS } from '../../data/content';
 import type { GameSpec } from '../../data/game-types';
 import { esc, onAction } from '../dom';
 import { icon } from '../icons';
 
-/**
- * "Mystery Level": three face-down cards; the player flips one. The outcome
- * is either an instant reward or a surprise mini-game drawn from the content.
- */
-export interface MysteryOutcome {
-  id: 'gift' | 'double' | 'speed' | 'puzzle' | 'special' | 'miniboss';
-  emoji: string;
-  title: string;
-  text: string;
-  /** Present when the outcome is a game to play. */
-  spec?: GameSpec;
-}
-
-const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
-const specsOf = <K extends GameSpec['type']>(type: K) =>
-  CHAPTERS.flatMap((c) => c.levels.map((l) => l.spec)).filter((s): s is Extract<GameSpec, { type: K }> => s?.type === type);
-
-export const rollOutcome = (): MysteryOutcome => {
-  const roll = pick(['gift', 'double', 'speed', 'puzzle', 'special', 'miniboss'] as const);
-  switch (roll) {
-    case 'gift':
-      return { id: roll, emoji: '🎁', title: 'Hộp quà', text: 'Bạn nhận được +50 điểm thưởng!' };
-    case 'double':
-      return { id: roll, emoji: '💰', title: 'Double XP', text: 'Level tiếp theo bạn hoàn thành sẽ được nhân đôi điểm!' };
-    case 'speed': {
-      const s = pick(specsOf('binary'));
-      return { id: roll, emoji: '⚡', title: 'Thử thách tốc độ', text: '20 giây, phân loại thật nhanh!', spec: { ...s, title: 'Thử thách tốc độ', timeLimitSec: 20, parTimeSec: 15 } };
-    }
-    case 'puzzle':
-      return { id: roll, emoji: '🧩', title: 'Puzzle', text: 'Ghép các cặp thẻ đúng với nhau.', spec: { ...pick(specsOf('match')), title: 'Puzzle bí ẩn' } };
-    case 'special': {
-      const s = pick(specsOf('choice'));
-      return { id: roll, emoji: '🎯', title: 'Câu hỏi đặc biệt', text: 'Một câu hỏi, cơ hội ghi điểm lớn!', spec: { ...s, title: 'Câu hỏi đặc biệt', questions: [pick(s.questions)] } };
-    }
-    case 'miniboss': {
-      const s = pick(specsOf('boss'));
-      return { id: roll, emoji: '🔥', title: 'Mini Boss', text: `${s.bossName} (bản mini) xuất hiện!`, spec: { ...s, title: `Mini Boss: ${s.bossName}`, steps: s.steps.slice(0, 2) } };
-    }
-  }
-};
+export type { MysteryOutcome } from '../../../../shared/mystery';
 
 /**
  * Render the card-flip picker into `root`. `levelId` is recorded for instant
@@ -73,20 +36,31 @@ export const mountMystery = (
   let outcome: MysteryOutcome | null = null;
 
   return onAction(root, {
-    flip: (el) => {
+    flip: async (el) => {
       if (flipped) return;
       flipped = true;
-      outcome = rollOutcome();
+      if (API_MODE && opts.levelId) {
+        // the server rolls the card and applies instant rewards (can't be forged)
+        try {
+          outcome = await openMysteryOnServer(opts.levelId);
+        } catch (e) {
+          flipped = false;
+          opts.robot(`Chưa lật được thẻ: ${(e as Error).message}`);
+          return;
+        }
+      } else {
+        outcome = rollMystery(CHAPTERS);
+        if (!outcome.spec && opts.levelId) {
+          if (outcome.id === 'gift') addBonusPoints(MYSTERY_GIFT_POINTS);
+          if (outcome.id === 'double') setDoubleXp(true);
+          recordResult(opts.levelId, { correct: 0, total: 0, timeMs: 0, notes: [] }, 3, 0);
+        }
+      }
       el.querySelector('[data-front]')!.innerHTML = `<span class="mcard__emoji">${outcome.emoji}</span><b>${esc(outcome.title)}</b>`;
       el.classList.add('is-flipped');
       root.querySelectorAll<HTMLButtonElement>('.mcard').forEach((c) => c !== el && c.classList.add('is-dim'));
 
       const instant = !outcome.spec;
-      if (instant && opts.levelId) {
-        if (outcome.id === 'gift') addBonusPoints(50);
-        if (outcome.id === 'double') setDoubleXp(true);
-        recordResult(opts.levelId, 3, 0);
-      }
       opts.robot(instant ? `${outcome.title}! ${outcome.text}` : `${outcome.title}! ${outcome.text} Sẵn sàng chưa?`);
 
       window.setTimeout(() => {
