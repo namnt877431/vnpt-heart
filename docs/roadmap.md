@@ -46,10 +46,12 @@
 ## Tiếp theo (gợi ý thứ tự)
 
 **Trước khi mở cho nhân viên:** CNTT gửi thông số LDAP (URL, Base DN, tài khoản dịch vụ, thuộc tính tên đăng nhập)
-→ `AUTH_PROVIDER=ldap`; chuyển repo sang private; tên miền + HTTPS; import danh sách nhóm; BTC chốt trọng số điểm nhóm.
+→ `AUTH_PROVIDER=ldap`; cài lên cloud Ubuntu (trong lúc còn tài khoản dev: chỉ mở cho mạng nội bộ/giới hạn IP);
+chuyển repo sang private; tên miền + HTTPS; import danh sách nhóm; BTC chốt trọng số điểm nhóm.
 
 **Kỹ thuật còn lại:** test trình duyệt tự động chạy mỗi lần push (CI); chạy thử tải vài trăm người; gỡ đáp án khỏi `GET /content` và chấm từng câu ở server; luật trao huy hiệu tự động;
 tải ảnh cảnh "Tìm mối nguy" mới; CI tự deploy lên server; thêm chặng thứ 7+ (vị trí đảo trên bản đồ);
+gói giao diện theo dịp lễ (Quốc khánh, Tết… — đổi màu/hình/nhạc theo lịch, biểu tượng quốc gia dùng file chuẩn);
 trình chỉnh avatar (bộ nhân vật chibi riêng).
 
 1. **Nội dung**: BTC cung cấp Sổ tay văn hóa, Bộ chuẩn mực & quy tắc, ATVSLĐ/5S, quy trình; soạn

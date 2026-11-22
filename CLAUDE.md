@@ -4,9 +4,12 @@ Web game nội bộ VNPT Đắk Lắk: "học mà chơi" văn hóa, quy tắc, t
 quy trình, ứng dụng AI. Cấu trúc **Bản đồ → Chặng → Level → Mini-game → Sao → Mở khóa** (kiểu Candy Crush),
 phong cách hình ảnh tham khảo Gunny, cuối mỗi chặng là Boss Challenge bắn góc/lực. Robot VNPT đồng hành.
 
-**Trạng thái:** v0.3 — có backend (`server/`, PostgreSQL), đăng nhập (dev/LDAP), trang quản trị cho BTC
-(`client/admin.html`), đóng gói Docker cho Ubuntu (`deploy/`). Bản demo GitHub Pages vẫn chạy offline (mock).
-Xem [docs/backend.md](docs/backend.md), [docs/game-design.md](docs/game-design.md), [docs/roadmap.md](docs/roadmap.md).
+**Trạng thái (22/11/2026):** v0.3 — có backend (`server/`, PostgreSQL), đăng nhập (dev/LDAP), trang quản trị cho BTC
+(`client/admin.html`), đóng gói Docker cho Ubuntu (`deploy/`), hàng đợi gửi lại kết quả khi mất mạng, nhật ký lỗi
+theo tài khoản/nguyên nhân. Bản demo GitHub Pages vẫn chạy offline (mock).
+**Đang chờ:** thông số LDAP từ CNTT, nội dung chính thức từ BTC, cài lên cloud Ubuntu, chuyển repo private.
+Tiến độ + lưu ý cho người: [README.md](README.md); chi tiết: [docs/backend.md](docs/backend.md),
+[docs/game-design.md](docs/game-design.md), [docs/roadmap.md](docs/roadmap.md).
 
 ## Đọc gì trước
 
@@ -48,6 +51,7 @@ cd ../server && npm test                 # vitest
 
 ```
 GameVNPT/
+├── README.md                  # giới thiệu, tiến độ, việc cần làm, lưu ý (cho người)
 ├── CLAUDE.md / AGENTS.md      # hướng dẫn cho AI agent (file này)
 ├── docs/                      # kiến trúc, backend, how-to, asset pipeline, roadmap
 ├── shared/                    # TS thuần dùng chung client ↔ server: kiểu spec, luật sao/điểm, mở khóa, mystery, kiểu API
@@ -108,6 +112,10 @@ GameVNPT/
 13. **Server là nơi quyết định** điểm, sao, mở khóa, phần thưởng Mystery. Client chỉ hiển thị tạm rồi lấy số của server.
     Đổi CSDL = sửa `server/src/db/schema.ts` → `npm run db:generate` → commit migration.
 14. Không commit `server/.env`, `deploy/.env`, dữ liệu nhân viên thật. Repo đang công khai.
+15. Tài khoản dev (`AUTH_PROVIDER=dev`, mật khẩu `vnpt@123` công khai) chỉ cho máy thử/demo giới hạn mạng;
+    máy chủ thật dùng LDAP. Không thêm đường tắt đăng nhập nào khác.
+16. Chỉ commit/push khi người dùng yêu cầu rõ ("chạy" = chạy local để xem). Cập nhật bảng tiến độ trong
+    `README.md` và `docs/roadmap.md` khi xong một hạng mục.
 
 ## Kiểm tra sau khi sửa
 
